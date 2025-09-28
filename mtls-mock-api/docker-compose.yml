@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  mtls-mock-server:
+    build: .
+    container_name: mtls-mock-server
+    ports:
+      - "8443:8443"
+    depends_on:
+      - redis

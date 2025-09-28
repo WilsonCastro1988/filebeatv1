@@ -78,6 +78,7 @@ public class InstitutionRoute extends RouteBuilder {
                     }*/
 
 
+                    log.info(response.getBody());
                     exchange.getMessage().setBody(response.getBody());
                 });
     }

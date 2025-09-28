@@ -7,7 +7,7 @@ info:
   description: ms-middleware-signcrypt
 
 server:
-  port: ${SERVER_PORT:8443}
+  port: ${SERVER_PORT:8442}
   servlet:
     context-path: /api
   compression:
@@ -49,7 +49,7 @@ logging:
   level:
     root: INFO
     org.springframework.web: INFO
-    com.banred: DEBUG   
+    com.banred: DEBUG
   file:
     name: logs/app.log
   logback:
@@ -73,7 +73,8 @@ camel:
 
 microservice:
   parameters:
-    REDIS_PORT: ${REDIS_PORT:6380}
+    REDIS_PORT: ${REDIS_PORT:6379}
     REDIS_USERNAME: ${REDIS_USERNAME:}
-    REDIS_PASSWORD: ${REDIS_PASSWORD:461ca15550627b3b9b33de6ab378136b81786f7dbfd9e5c895502b6284eacdd8}
-    REDIS_HOSTNAME: ${REDIS_HOSTNAME:192.168.33.169}
+    REDIS_PASSWORD: ${REDIS_PASSWORD:}
+    REDIS_HOSTNAME: ${REDIS_HOSTNAME:localhost}
+    RUTA_CONFIG_XML: ${RUTA_CONFIG_XML:F:/Filebeat/filebeatv1/config-service.xml}
