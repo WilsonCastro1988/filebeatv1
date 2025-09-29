@@ -1,0 +1,98 @@
+Generar los certificados 🔑
+
+Necesitas dos pares (uno para el servidor y otro para los clientes):
+
+📌 Servidor
+keytool -genkeypair \
+  -alias secure-gateway \
+  -keyalg RSA \
+  -keysize 2048 \
+  -storetype PKCS12 \
+  -keystore server-keystore.p12 \
+  -validity 3650 \
+  -dname "CN=localhost, OU=Dev, O=MyCompany, L=Quito, ST=Pichincha, C=EC" \
+  -storepass serverpass
+
+
+Exporta el certificado público para que lo usen los clientes:
+
+keytool -export -alias secure-gateway \
+  -keystore server-keystore.p12 \
+  -storepass serverpass \
+  -file server-cert.cer
+
+📌 Cliente
+keytool -genkeypair \
+  -alias client-app \
+  -keyalg RSA \
+  -keysize 2048 \
+  -storetype PKCS12 \
+  -keystore client-keystore.p12 \
+  -validity 3650 \
+  -dname "CN=client, OU=Dev, O=MyCompany, L=Quito, ST=Pichincha, C=EC" \
+  -storepass clientpass
+
+
+Exporta el certificado público del cliente:
+
+keytool -export -alias client-app \
+  -keystore client-keystore.p12 \
+  -storepass clientpass \
+  -file client-cert.cer
+
+📌 Configurar confianza mutua
+
+👉 Importa el certificado del cliente en el truststore del servidor:
+
+keytool -import -alias client-app \
+  -keystore server-truststore.p12 \
+  -storetype PKCS12 \
+  -file client-cert.cer \
+  -storepass serverpass
+
+
+👉 Importa el certificado del servidor en el truststore del cliente:
+
+keytool -import -alias secure-gateway \
+  -keystore client-truststore.p12 \
+  -storetype PKCS12 \
+  -file server-cert.cer \
+  -storepass clientpass
+
+
+------
+# 1. Crear CA
+openssl genrsa -out ca.key 2048
+openssl req -x509 -new -nodes -key ca.key -sha256 -days 3650 -out ca.crt -subj "/C=EC/O=TestOrg/CN=TestCA"
+
+# 2. Crear clave y CSR para el servidor
+openssl genrsa -out server.key 2048
+openssl req -new -key server.key -out server.csr -subj "/C=EC/O=TestOrg/CN=localhost"
+
+# 3. Firmar certificado del servidor con la CA
+openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt -days 365 -sha256
+
+# 4. Crear clave y CSR para el cliente
+openssl genrsa -out client.key 2048
+openssl req -new -key client.key -out client.csr -subj "/C=EC/O=TestOrg/CN=client"
+
+# 5. Firmar certificado del cliente con la CA
+openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out client.crt -days 365 -sha256
+
+# 6. Convertir cliente a PKCS12 (para curl o Java KeyStore)
+openssl pkcs12 -export -in client.crt -inkey client.key -out client-keystore.p12 -name client -passout pass:clientpass
+
+# 7. Servidor a PKCS12 (opcional, para Spring Boot)
+openssl pkcs12 -export -in server.crt -inkey server.key -out server-keystore.p12 -name server -passout pass:serverpass
+
+
+Escenario	Certificado	Resultado esperado
+Certificado válido	Emitido por tu CA o mockMTLS	200 OK → acceso permitido
+Certificado inválido	No emitido por tu CA o modificado	403 Forbidden o 401 Unauthorized → acceso denegado
+Certificado expirado	Fecha de expiración vencida	403 Forbidden o 401 Unauthorized → acceso denegado
+Sin certificado	Ningún certificado enviado	401 Unauthorized → acceso denegado
+CN no registrado en tu UserDetailsService	Certificado válido pero CN desconocido	403 Forbidden → acceso denegado
+
+
+    "password": "$2a$12$Tj1oT.Ye43ritDZzMvglnOEyV1N84UGF6q.AFG5lqiI.GsbEnQsfy",
+
