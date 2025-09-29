@@ -1,0 +1,97 @@
+  382  docker docker-compose-all.yml up -d
+  383  docker-compose-all.yml up -d
+  384  cd C:\etc\tls
+  385  cd C:/etc/tls
+  386  pwd
+  387  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer   -u user:password
+  388  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  389  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer   -u user:password
+  390  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  391  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  392  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  393  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  394  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  395  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  396  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  397  curl -vk https://localhost:8443/api/secure/hello --cert client-keystore.p12:clientpass --key client-keystore.p12:clientpass --cacert server-cert.cer
+  398  curl -vk https://localhost:8443/api/secure/hello --cert client-keystore.p12:clientpass --key client-keystore.p12:clientpass --cacert server-cert.cer
+  399  curl -vk https://localhost:8443/api/secure/hello --cert client-keystore.p12:clientpass --key client-keystore.p12:clientpass --cacert server-cert.cer
+  400  curl -vk https://localhost:8443/api/secure/hello --cert client-keystore.p12:clientpass --key client-keystore.p12:clientpass --cacert server-cert.cer
+  401  curl -vk https://localhost:8443/api/secure/hello --cert client-keystore.p12:clientpass --key client-keystore.p12:clientpass --cacert server-cert.cer
+  402  curl -vk https://localhost:8443/api/secure/hello --cert client-keystore.p12:clientpass --key client-keystore.p12:clientpass --cacert server-cert.cer
+  403  curl -vk https://localhost:8443/api/secure/hello --cert client-keystore.p12:clientpass --key client-keystore.p12:clientpass --cacert server-cert.cer
+  404  curl -vk https://localhost:8443/api/secure/hello --cert client-keystore.p12:clientpass --key client-keystore.p12:clientpass --cacert server-cert.cer
+  405  curl -vk https://localhost:8443/api/secure/hello --cert client-keystore.p12:clientpass --key client-keystore.p12:clientpass --cacert server-cert.cer
+  406  curl -vk https://localhost:8443/api/secure/hello --cert client-keystore.p12:clientpass --key client-keystore.p12:clientpass --cacert server-cert.cer
+  407  curl -vk https://localhost:8443/api/secure/hello --cert client-keystore.p12:clientpass --key client-keystore.p12:clientpass --cacert server-cert.cer
+  408  curl -vk https://localhost:8443/api/secure/hello --cert client-keystore.p12:clientpass --key client-keystore.p12:clientpass --cacert server-cert.cer
+  409  curl -vk https://localhost:8443/api/secure/hello --cert client-keystore.p12:clientpass --key client-keystore.p12:clientpass --cacert server-cert.cer
+  410  curl -vk https://localhost:8443/api/secure/hello --cert client-keystore.p12:clientpass --key client-keystore.p12:clientpass --cacert server-cert.cer
+  411  curl -vk https://localhost:8443/api/secure/hello --cert client-keystore.p12:clientpass --key client-keystore.p12:clientpass --cacert server-cert.cer
+  412  curl -vk https://localhost:8443/api/secure/hello --cert client-keystore.p12:clientpass --key client-keystore.p12:clientpass --cacert server-cert.cer
+  413  curl -vk https://localhost:8443/api/secure/hello --cert client-keystore.p12:clientpass --key client-keystore.p12:clientpass --cacert server-cert.cer
+  414  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  415  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  416  curl -vk https://localhost:8443/api/secure/hello   -u client:password
+  417  curl -vk https://localhost:8443/api/secure/hello   -u client:wilson
+  418  curl -vk https://localhost:8443/api/secure/hello   -u client:wilson
+  419  curl -vk https://localhost:8443/api/secure/hello   -u client:wilson
+  420  curl -vk https://localhost:8443/api/secure/hello   -u client:wilson
+  421  curl -vk https://localhost:8443/api/secure/hello -u client:wilson
+  422  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  423  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer -u client:wilson
+  424  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer -u client:wilsond
+  425  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  426  curl -vk https://localhost:8443/api/secure/hello   -u client:wilson
+  427  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer   -u client:wilson
+  428  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer   -u client:wilsonssss
+  429  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  430  curl -vk https://localhost:8443/api/secure/hello   -u client:wilson
+  431  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer   -u client:wilson
+  432  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer   -u client:wilsonsss
+  433  curl -vk https://localhost:8443/api/secure/hello   -u client:wilson
+  434  curl -vk https://localhost:8443/api/secure/hello   -u client:wilson
+  435  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer   -u client:wilson
+  436  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer   -u client:wilsonddd
+  437  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer   -u client:wilsonddd
+  438  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer   -u client:wilsonddd
+  439  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  440  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  441  curl -vk https://localhost:8443/api/secure/hello   -u client:wilson
+  442  curl -vk https://localhost:8443/api/secure/hello   -u client:wilson
+  443  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer   -u client:wilsonddd
+  444  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer   -u client:wilsonddd
+  445  curl -vk https://localhost:8443/api/secure/hello -u client:wilsonss  --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  446  curl -vk https://localhost:8443/api/secure/hello -u client:wilsonss  --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  447  curl -vk https://localhost:8443/api/secure/hello -u client:wilsonss  --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  448  curl -vk https://localhost:8443/api/secure/hello   -u client:wilson
+  449  curl -vk https://localhost:8443/api/secure/hello   -u client:wilson
+  450  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  451  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  452  curl -vk https://localhost:8443/api/secure/hello   -u client:wilson
+  453  curl -vk https://localhost:8443/api/secure/hello   -u client:wilson
+  454  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  455  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  456  curl -vk https://localhost:8443/api/secure/hello   -u client:wilson
+  457  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer   -u client:wilsonddd
+  458  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer   -u client:wilsonddd
+  459  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer   -u client:wilsonddd
+  460  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer   -u client:wilson
+  461  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --cert-type P12   --cacert server-cert.cer   -u client:wilson
+  462  openssl pkcs12 -in client-keystore.p12 -clcerts -nokeys -out client.crt
+  463  openssl pkcs12 -in client-keystore.p12 -clcerts -nokeys -out client.crt
+  464  clear
+  465  curl -vk https://localhost:8443/api/secure/hello   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  466  curl -vk https://localhost:8443/api/secure/mtls   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  467  curl -vk https://localhost:8443/api/secure/hello --cert client-keystore.p12:clientpass --cert-type P12 --cacert server-cert.cer -u client:wilson
+  468  curl -vk https://localhost:8443/api/secure/mtls --cert client-keystore.p12:clientpass --cert-type P12 --cacert server-cert.cer -u client:wilson
+  469  curl -vk https://localhost:8443/api/secure/mtls --cert client-keystore.p12:clientpass --cert-type P12 --cacert server-cert.cer -u client:wilson
+  470  openssl pkcs12 -in client-keystore.p12 -nocerts -nodes -out client.key -passin pass:clientpass
+  471  openssl pkcs12 -in client-keystore.p12 -clcerts -nokeys -out client.crt -passin pass:clientpass
+  472  keytool -import -alias server-cert -file server-cert.cer -keystore truststore.jks -storepass changeit
+  473  curl -vk https://localhost:8442/api/secure/mtls   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  474  curl -vk https://localhost:8443/api/secure/mtls   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  475  curl -vk https://localhost:8443/api/secure/mtls   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  476  curl -vk https://localhost:8443/api/secure/mtls   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  477  curl -vk https://localhost:8443/api/secure/mtls   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
+  478  curl -vk https://localhost:8443/api/secure/mtls   --cert client-keystore.p12:clientpass   --key client-keystore.p12:clientpass   --cacert server-cert.cer
