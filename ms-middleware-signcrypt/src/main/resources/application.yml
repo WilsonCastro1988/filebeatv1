@@ -47,9 +47,10 @@ spring:
 
 logging:
   level:
-    root: INFO
-    org.springframework.web: INFO
+    root: DEBUG
+    org.springframework.web: DEBUG
     com.banred: DEBUG
+    org.springframework.security: DEBUG
   file:
     name: logs/app.log
   logback:
@@ -77,4 +78,4 @@ microservice:
     REDIS_USERNAME: ${REDIS_USERNAME:}
     REDIS_PASSWORD: ${REDIS_PASSWORD:}
     REDIS_HOSTNAME: ${REDIS_HOSTNAME:localhost}
-    RUTA_CONFIG_XML: ${RUTA_CONFIG_XML:F:/Filebeat/filebeatv1/config-service.xml}
+    RUTA_CONFIG_XML: ${RUTA_CONFIG_XML:C:/etc/tls/config-service.xml}

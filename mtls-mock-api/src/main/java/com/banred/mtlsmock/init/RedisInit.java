@@ -16,6 +16,9 @@ public class RedisInit {
             // mTLS clients
             redisTemplate.opsForValue().set("client1", new UserRecord("client1", null, new String[]{"USER"}));
             redisTemplate.opsForValue().set("client2", new UserRecord("client2", null, new String[]{"USER","ADMIN"}));
+            redisTemplate.opsForValue().set("cliente-expired", new UserRecord("client-expired", null, new String[]{"USER","ADMIN"}));
+            redisTemplate.opsForValue().set("cliente-valid", new UserRecord("client-valid", null, new String[]{"USER","ADMIN"}));
+
 
             // Basic Auth users
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();

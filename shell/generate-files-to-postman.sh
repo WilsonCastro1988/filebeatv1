@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Configuración
-KEYSTORE="C:/etc/tls/crt-casos/caso1/client_valid-keystore.p12"
+KEYSTORE="C:/etc/tls/crt-casos/caso3/client_expired-keystore.p12"
 PASSWORD="clientpass"
-CRT_OUT="C:/etc/tls/crt-casos/caso1/client.crt"
-KEY_OUT="C:/etc/tls/crt-casos/caso1/client.key"
-PFX_OUT="C:/etc/tls/crt-casos/caso1/client.pfx"
+CRT_OUT="C:/etc/tls/crt-casos/caso3/client.crt"
+KEY_OUT="C:/etc/tls/crt-casos/caso3/client.key"
+PFX_OUT="C:/etc/tls/crt-casos/caso3/client.pfx"
 
 echo "🔓 Extrayendo certificado (.crt)..."
 openssl pkcs12 -in $KEYSTORE -clcerts -nokeys -out $CRT_OUT -passin pass:$PASSWORD

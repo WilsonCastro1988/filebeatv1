@@ -3,7 +3,7 @@ package com.banred.ms_middleware_signcrypt.components;
 import com.banred.ms_middleware_signcrypt.model.Institution;
 import com.banred.ms_middleware_signcrypt.service.IInstitutionRedisService;
 import com.banred.ms_middleware_signcrypt.service.RestTemplateService;
-import com.banred.ms_middleware_signcrypt.service.SecurityProcessService;
+import com.banred.ms_middleware_signcrypt.service.CryptoService;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,7 @@ public class InstitutionRoute extends RouteBuilder {
     private RestTemplateService restTemplateService;
 
     @Autowired
-    private SecurityProcessService securityProcessor;
+    private CryptoService cryptoService;
 
 /*
     @Override
@@ -60,18 +60,19 @@ public class InstitutionRoute extends RouteBuilder {
 
                     RestTemplate restTemplate = null;
                     ResponseEntity<String> response = null;
+                    String responseBody = null;
 
                     //Apicar MTLS
                     if (institution.getMtls() != null && institution.getMtls().isEnable()) {
                         restTemplate = restTemplateService.getRestTemplate(institution.getId());
                         response = restTemplate.getForEntity(institution.getEndpoint(), String.class);
                     }
-/*
+
                     // Aplicar JWS
                     if (institution.getJws() != null && institution.getJws().isEnable()) {
-                        responseBody = securityProcessor.sign(responseBody, institution.getJws());
+                        responseBody = cryptoService.encryptData(institutionId);
                     }
-
+/*
                     // Aplicar JWE
                     if (institution.getJwe() != null && institution.getJwe().isEnable()) {
                         responseBody = securityProcessor.encrypt(responseBody, institution.getJwe());

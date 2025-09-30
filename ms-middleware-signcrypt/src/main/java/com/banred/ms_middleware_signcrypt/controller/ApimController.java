@@ -15,7 +15,7 @@ public class ApimController {
     private ProducerTemplate producerTemplate;
 
     @PostMapping("apim")
-    public String handleApimRequestV2(@RequestBody String id) {
+    public String handleApimRequest(@RequestBody String id) {
         try {
             return producerTemplate.requestBody("direct:secureInstitutionCall", id, String.class);
         } catch (Exception e) {
