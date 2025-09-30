@@ -1,0 +1,867 @@
+<Institutions>
+<Institution id="0002">
+    <name>Banco TEST Valido</name>
+    <tls>true</tls>
+    <timeout>15000</timeout>
+    <endpoint>https://localhost:8443/api/secure/mtls</endpoint>
+    <mtls enable="true">
+        <keystore>C:/etc/tls/certs/clients/client-valid-keystore.p12</keystore>
+        <truststore>C:/etc/tls/certs/clients/client-valid-truststore.p12</truststore>
+        <keystorePassword>clientpass</keystorePassword>
+        <truststorePassword>clientpass</truststorePassword>
+    </mtls>
+    <jws enable="true">
+        <keystore>/certs/keystore/jws/valid-keystore.key</keystore>
+        <truststore>/truststore/banred/jws/valid-truststore.jks</truststore>
+        <keystorePassword>password-encrypted</keystorePassword>
+        <truststorePassword>password-encrypted</truststorePassword>
+    </jws>
+    <jwe enable="true">
+        <keystore>/certs/keystore/jwe/valid-keystore.key</keystore>
+        <truststore>/truststore/banred/jwe/valid-truststore.jks</truststore>
+        <keystorePassword>password-encrypted</keystorePassword>
+        <truststorePassword>password-encrypted</truststorePassword>
+    </jwe>
+</Institution>
+<Institution id="0003">
+    <name>Banco TEST Invalido</name>
+    <tls>true</tls>
+    <timeout>15000</timeout>
+    <endpoint>https://localhost:8443/api/secure/mtls</endpoint>
+    <mtls enable="true">
+        <keystore>C:/etc/tls/certs/clients/client-invalid-keystore.p12</keystore>
+        <truststore>C:/etc/tls/certs/clients/client-invalid-truststore.p12</truststore>
+        <keystorePassword>clientpass</keystorePassword>
+        <truststorePassword>clientpass</truststorePassword>
+    </mtls>
+    <jws enable="true">
+        <keystore>/certs/keystore/jws/invalid-keystore.key</keystore>
+        <truststore>/truststore/banred/jws/invalid-truststore.jks</truststore>
+        <keystorePassword>password-encrypted</keystorePassword>
+        <truststorePassword>password-encrypted</truststorePassword>
+    </jws>
+    <jwe enable="true">
+        <keystore>/certs/keystore/jwe/invalid-keystore.key</keystore>
+        <truststore>/truststore/banred/jwe/invalid-truststore.jks</truststore>
+        <keystorePassword>password-encrypted</keystorePassword>
+        <truststorePassword>password-encrypted</truststorePassword>
+    </jwe>
+</Institution>
+<Institution id="0004">
+    <name>Banco TEST Expirado</name>
+    <tls>true</tls>
+    <timeout>15000</timeout>
+    <endpoint>https://localhost:8443/api/secure/mtls</endpoint>
+    <mtls enable="true">
+        <keystore>C:/etc/tls/certs/clients/client-expired-keystore.p12</keystore>
+        <truststore>C:/etc/tls/certs/clients/client-expired-truststore.p12</truststore>
+        <keystorePassword>clientpass</keystorePassword>
+        <truststorePassword>clientpass</truststorePassword>
+    </mtls>
+    <jws enable="true">
+        <keystore>/certs/keystore/jws/expired-keystore.key</keystore>
+        <truststore>/truststore/banred/jws/expired-truststore.jks</truststore>
+        <keystorePassword>password-encrypted</keystorePassword>
+        <truststorePassword>password-encrypted</truststorePassword>
+    </jws>
+    <jwe enable="true">
+        <keystore>/certs/keystore/jwe/expired-keystore.key</keystore>
+        <truststore>/truststore/banred/jwe/expired-truststore.jks</truststore>
+        <keystorePassword>password-encrypted</keystorePassword>
+        <truststorePassword>password-encrypted</truststorePassword>
+    </jwe>
+</Institution>
+<Institution id="0005">
+    <name>Banco TEST Sin Certificado</name>
+    <tls>true</tls>
+    <timeout>15000</timeout>
+    <endpoint>https://localhost:8443/api/secure/mtls</endpoint>
+    <mtls enable="false">
+        <keystore></keystore>
+        <truststore></truststore>
+        <keystorePassword></keystorePassword>
+        <truststorePassword></truststorePassword>
+    </mtls>
+    <jws enable="false">
+        <keystore></keystore>
+        <truststore></truststore>
+        <keystorePassword></keystorePassword>
+        <truststorePassword></truststorePassword>
+    </jws>
+    <jwe enable="false">
+        <keystore></keystore>
+        <truststore></truststore>
+        <keystorePassword></keystorePassword>
+        <truststorePassword></truststorePassword>
+    </jwe>
+</Institution>
+<Institution id="0006">
+    <name>Banco TEST Desconocido</name>
+    <tls>true</tls>
+    <timeout>15000</timeout>
+    <endpoint>https://localhost:8443/api/secure/mtls</endpoint>
+    <mtls enable="true">
+        <keystore>C:/etc/tls/certs/clients/client-unknown-keystore.p12</keystore>
+        <truststore>C:/etc/tls/certs/clients/client-unknown-truststore.p12</truststore>
+        <keystorePassword>clientpass</keystorePassword>
+        <truststorePassword>clientpass</truststorePassword>
+    </mtls>
+    <jws enable="true">
+        <keystore>/certs/keystore/jws/unknown-keystore.key</keystore>
+        <truststore>/truststore/banred/jws/unknown-truststore.jks</truststore>
+        <keystorePassword>password-encrypted</keystorePassword>
+        <truststorePassword>password-encrypted</truststorePassword>
+    </jws>
+    <jwe enable="true">
+        <keystore>/certs/keystore/jwe/unknown-keystore.key</keystore>
+        <truststore>/truststore/banred/jwe/unknown-truststore.jks</truststore>
+        <keystorePassword>password-encrypted</keystorePassword>
+        <truststorePassword>password-encrypted</truststorePassword>
+    </jwe>
+</Institution>
+<Institution id="0001">
+        <name>Banco TEST</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://localhost:8443/api/secure/mtls</endpoint>
+        <mtls enable="true">
+            <keystore>C:/etc/tls/certs/clients/client-keystore.p12</keystore>
+            <truststore>C:/etc/tls/certs/clients/client-truststore.p12</truststore>
+            <keystorePassword>clientpass</keystorePassword>
+            <truststorePassword>clientpass</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0704">
+        <name>Banco Bolivariano</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0704.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0738">
+        <name>Coop Jep</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0738.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0015">
+        <name>Diners</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0015.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0193">
+        <name>Banco Internacional</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0193.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0722">
+        <name>Banco Loja</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0722.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0717">
+        <name>Copp. el Sagrario</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0717.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0720">
+        <name>Coop. Pablo Munoz Vega</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0720.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0723">
+        <name>Coop. Alianza del Valle</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0723.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0725">
+        <name>Banco Guayaquil</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0725.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0726">
+        <name>Banco Austro</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0726.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0727">
+        <name>Banco Produbanco</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0727.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0728">
+        <name>Coop. Policia Nacional</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0728.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0729">
+        <name>Coop. Mego</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0729.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0731">
+        <name>Banco Pacifico</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0731.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0732">
+        <name>Coop. 23deJulio</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0732.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0735">
+        <name>Coop. Andalucia</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0735.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0736">
+        <name>Banco Solidario</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0736.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="2501">
+        <name>Mutialista Imbabura</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-2501.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="2502">
+        <name>Daquilema</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-2502.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="2500">
+        <name>Banco DelBank</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-2500.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0701">
+        <name>Banco Pacifico</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0701.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0737">
+        <name>Coop 29 de Octubre</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0737.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="2503">
+        <name>Coop 15 de abril</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-2503.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="2506">
+        <name>Banco General Ruminahui</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-2506.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="2507">
+        <name>Coop Progreso</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-2507.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="1738">
+        <name>Coop Patito</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-1738.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="2504">
+        <name>Coop Crea</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-2504.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="0739">
+        <name>Coop Mushuc Runa</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-0739.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+    <Institution id="2509">
+        <name>Banco Procredit</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-2509.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+
+    <Institution id="2508">
+        <name>Coop Pastaza</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://api.banco-2508.com/path</endpoint>
+        <mtls enable="true">
+            <keystore>/certs/keystore/mtls/keystore.key</keystore>
+            <truststore>/truststore/banred/mtls/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </mtls>
+        <jws enable="true">
+            <keystore>/certs/keystore/jws/keystore.key</keystore>
+            <truststore>/truststore/banred/jws/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jws>
+        <jwe enable="true">
+            <keystore>/certs/keystore/jwe/keystore.key</keystore>
+            <truststore>/truststore/banred/jwe/truststore.jks</truststore>
+            <keystorePassword>password-encrypted</keystorePassword>
+            <truststorePassword>password-encrypted</truststorePassword>
+        </jwe>
+    </Institution>
+</Institutions>
