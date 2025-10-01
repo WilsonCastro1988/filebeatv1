@@ -1,6 +1,5 @@
 package com.banred.ms_middleware_signcrypt.service.Implementation;
 
-
 import com.banred.ms_middleware_signcrypt.model.Institution;
 import com.banred.ms_middleware_signcrypt.service.IInstitutionRedisService;
 import com.banred.ms_middleware_signcrypt.service.IInstitutionService;
@@ -19,7 +18,8 @@ import javax.net.ssl.TrustManagerFactory;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
-
+import java.security.cert.X509Certificate;
+import java.util.Enumeration;
 
 @Service
 public class RestTemplateServiceImpl implements RestTemplateService {
@@ -32,13 +32,12 @@ public class RestTemplateServiceImpl implements RestTemplateService {
     @Autowired
     private IInstitutionRedisService institutionRedisService;
 
-
     @Override
     public RestTemplate getRestTemplate(String institutionId) {
         logger.info("Creando RestTemplate para institución {}", institutionId);
         try {
             Institution institution = institutionRedisService.getInstitution(institutionId);
-            RestTemplate restTemplate = null;
+            RestTemplate restTemplate;
             if (institution.getMtls() != null && institution.getMtls().isEnable()) {
                 SSLContext sslContext = configureSSLContext(institution);
                 restTemplate = new RestTemplate(createRequestFactory(sslContext, institution.getTimeout()));
@@ -47,10 +46,9 @@ public class RestTemplateServiceImpl implements RestTemplateService {
                 restTemplate = new RestTemplate(); // sin mTLS
                 logger.info("RestTemplate sin MTLS -> para institución {}", institutionId);
             }
-
             return restTemplate;
         } catch (Exception e) {
-            logger.error("Error al crear RestTemplate para institución {}", institutionId);
+            logger.error("Error al crear RestTemplate para institución {}", institutionId, e);
             throw new RuntimeException("Error inicializando RestTemplates", e);
         }
     }
@@ -59,29 +57,72 @@ public class RestTemplateServiceImpl implements RestTemplateService {
         try {
             SSLContext sslContext = SSLContext.getInstance("TLS");
 
+            // Cargar keystore
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            keyStore.load(new FileInputStream(institution.getMtls().getKeystore()),
-                    decrypt(institution.getMtls().getKeystorePassword()).toCharArray());
+            String keystorePath = institution.getMtls().getKeystore();
+            char[] keystorePassword = decrypt(institution.getMtls().getKeystorePassword()).toCharArray();
+            try (FileInputStream fis = new FileInputStream(keystorePath)) {
+                keyStore.load(fis, keystorePassword);
+            }
+
+            // Verificar certificados en el keystore
+            Enumeration<String> aliases = keyStore.aliases();
+            while (aliases.hasMoreElements()) {
+                String alias = aliases.nextElement();
+                X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
+                if (cert != null) {
+                    try {
+                        cert.checkValidity();
+                        logger.info("Certificado válido en keystore, alias: {}, valido hasta: {}",
+                                alias, cert.getNotAfter());
+                    } catch (Exception e) {
+                        logger.error("Certificado expirado o no válido en keystore, alias: {}, error: {}",
+                                alias, e.getMessage());
+                        throw new IllegalStateException("Certificado expirado o no válido en keystore para alias: " + alias, e);
+                    }
+                }
+            }
 
             KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            kmf.init(keyStore, decrypt(institution.getMtls().getKeystorePassword()).toCharArray());
+            kmf.init(keyStore, keystorePassword);
 
+            // Cargar truststore
             KeyStore trustStore = KeyStore.getInstance("JKS");
-            trustStore.load(new FileInputStream(institution.getMtls().getTruststore()),
-                    decrypt(institution.getMtls().getTruststorePassword()).toCharArray());
+            String truststorePath = institution.getMtls().getTruststore();
+            char[] truststorePassword = decrypt(institution.getMtls().getTruststorePassword()).toCharArray();
+            try (FileInputStream fis = new FileInputStream(truststorePath)) {
+                trustStore.load(fis, truststorePassword);
+            }
+
+            // Verificar certificados en el truststore
+            aliases = trustStore.aliases();
+            while (aliases.hasMoreElements()) {
+                String alias = aliases.nextElement();
+                X509Certificate cert = (X509Certificate) trustStore.getCertificate(alias);
+                if (cert != null) {
+                    try {
+                        cert.checkValidity();
+                        logger.info("Certificado válido en truststore, alias: {}, valido hasta: {}",
+                                alias, cert.getNotAfter());
+                    } catch (Exception e) {
+                        logger.error("Certificado expirado o no válido en truststore, alias: {}, error: {}",
+                                alias, e.getMessage());
+                        throw new IllegalStateException("Certificado expirado o no válido en truststore para alias: " + alias, e);
+                    }
+                }
+            }
 
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(trustStore);
 
             sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-
             return sslContext;
 
         } catch (Exception e) {
-            throw new RuntimeException("Error creando RestTemplate para institución " + institution.getId(), e);
+            logger.error("Error configurando SSLContext para institución {}", institution.getId(), e);
+            throw new RuntimeException("Error configurando SSLContext para institución " + institution.getId(), e);
         }
     }
-
 
     private ClientHttpRequestFactory createRequestFactory(SSLContext sslContext, int timeout) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory() {
@@ -103,4 +144,3 @@ public class RestTemplateServiceImpl implements RestTemplateService {
         return encryptedPassword; // temporalmente sin desencriptar
     }
 }
-
