@@ -4,6 +4,7 @@ import com.banred.ms_middleware_signcrypt.model.Institution;
 import com.banred.ms_middleware_signcrypt.service.IInstitutionRedisService;
 import com.banred.ms_middleware_signcrypt.service.RestTemplateService;
 import com.banred.ms_middleware_signcrypt.service.CryptoService;
+import com.banred.ms_middleware_signcrypt.service.RestTemplateService2;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,7 @@ public class InstitutionRoute extends RouteBuilder {
 
 
     @Autowired
-    private RestTemplateService restTemplateService;
+    private RestTemplateService2 restTemplateService;
 
     @Autowired
     private CryptoService cryptoService;
