@@ -71,6 +71,7 @@ public class InstitutionRoute extends RouteBuilder {
                     // Aplicar JWS
                     if (institution.getJws() != null && institution.getJws().isEnable()) {
                         responseBody = cryptoService.encryptData(institutionId);
+                        responseBody = cryptoService.decrypt(responseBody, institution.getJwe());
                     }
 /*
                     // Aplicar JWE
@@ -80,7 +81,9 @@ public class InstitutionRoute extends RouteBuilder {
 
 
                     log.info(response.getBody());
-                    exchange.getMessage().setBody(response.getBody());
+                    log.info(responseBody);
+
+                    exchange.getMessage().setBody(responseBody);
                 });
     }
 
