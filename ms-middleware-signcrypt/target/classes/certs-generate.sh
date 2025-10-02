@@ -305,9 +305,9 @@ echo "<=============================================================>"
 echo "✅ Revocanbdo certificados en  $BASE_DIR/ "
 
 # ==== 4. Revocar certificados ====
-openssl ca -config $BASE_DIR/ca.cnf -revoke $CLIENT_DIR/client-valid.crt
-openssl ca -config $BASE_DIR/ca.cnf -revoke $CLIENT_DIR/client-expired.crt
-openssl ca -config $BASE_DIR/ca.cnf -revoke $CLIENT_DIR/client-invalid.crt
+#openssl ca -config $BASE_DIR/ca.cnf -revoke $CLIENT_DIR/client-valid.crt
+#openssl ca -config $BASE_DIR/ca.cnf -revoke $CLIENT_DIR/client-expired.crt
+#openssl ca -config $BASE_DIR/ca.cnf -revoke $CLIENT_DIR/client-invalid.crt
 
 # ==== 5. Generar CRL ====
 openssl ca -config $BASE_DIR/ca.cnf -gencrl -out $CRL_DIR/crl.pem

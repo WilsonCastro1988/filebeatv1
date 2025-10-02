@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.security.cert.*;
 import java.util.List;
 
 @SpringBootApplication
+@EnableScheduling
 public class MsMiddlewareSigncryptApplication {
 
     @Value("${microservice.parameters.RUTA_CRL}")
@@ -22,7 +24,7 @@ public class MsMiddlewareSigncryptApplication {
 
     public static void main(String[] args) throws CertificateException, NoSuchProviderException, FileNotFoundException {
         SpringApplication.run(MsMiddlewareSigncryptApplication.class, args); // 1. Load the certificates (replace with your actual certificate loading)
-
+/*
         Security.addProvider(new BouncyCastleProvider());
 
         CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509", "BC");
@@ -43,6 +45,8 @@ public class MsMiddlewareSigncryptApplication {
         } catch (IOException | CRLException e) {
             throw new RuntimeException(e);
         }
+
+ */
 
     }
 
