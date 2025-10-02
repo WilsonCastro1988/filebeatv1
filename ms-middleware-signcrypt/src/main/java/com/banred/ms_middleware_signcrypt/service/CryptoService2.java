@@ -5,7 +5,7 @@ import com.banred.ms_middleware_signcrypt.model.SecurityConfig;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 
-public interface CryptoService {
+public interface CryptoService2 {
 
     String sign(String payload, SecurityConfig jwsConfig) throws Exception;
 

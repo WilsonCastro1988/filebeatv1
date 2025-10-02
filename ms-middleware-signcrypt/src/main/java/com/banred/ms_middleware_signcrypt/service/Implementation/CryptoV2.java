@@ -3,6 +3,7 @@ package com.banred.ms_middleware_signcrypt.service.Implementation;
 import com.banred.ms_middleware_signcrypt.model.Institution;
 import com.banred.ms_middleware_signcrypt.model.SecurityConfig;
 import com.banred.ms_middleware_signcrypt.service.CryptoService;
+import com.banred.ms_middleware_signcrypt.service.CryptoService2;
 import com.banred.ms_middleware_signcrypt.service.IInstitutionRedisService;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.RSASSASigner;
@@ -29,7 +30,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
-public class CryptoV2 implements CryptoService {
+public class CryptoV2 implements CryptoService2 {
 
     @Autowired
     private IInstitutionRedisService institutionRedisService;

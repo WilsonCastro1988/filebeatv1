@@ -79,3 +79,4 @@ microservice:
     REDIS_PASSWORD: ${REDIS_PASSWORD:}
     REDIS_HOSTNAME: ${REDIS_HOSTNAME:localhost}
     RUTA_CONFIG_XML: ${RUTA_CONFIG_XML:C:/etc/tls/config-service.xml}
+    RUTA_CRL: ${RUTA_CRL:certs/ca/crl/crl.der}
