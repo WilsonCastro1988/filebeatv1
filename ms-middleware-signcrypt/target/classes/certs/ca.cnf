@@ -1,0 +1,47 @@
+[ req ]
+default_bits       = 2048
+prompt             = no
+default_md         = sha256
+distinguished_name = dn
+x509_extensions    = v3_ca
+
+[ dn ]
+C  = EC
+O  = MiCA
+CN = MiTestCA
+
+[ v3_ca ]
+basicConstraints = CA:true
+keyUsage = keyCertSign, cRLSign
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+
+[ ca ]
+default_ca = CA_default
+
+[ CA_default ]
+dir               = ./certs/ca
+certs             = certs/ca/certs
+crl_dir           = certs/ca/crl
+new_certs_dir     = certs/ca/newcerts
+database          = certs/ca/index.txt
+serial            = certs/ca/serial
+#crlnumber         = certs/ca/crlnumber
+crl               = certs/ca/crl.pem
+private_key       = certs/ca/ca.key
+certificate       = certs/ca/ca.crt
+default_days      = 365
+default_md        = sha256
+policy            = policy_match
+x509_extensions   = v3_ca
+crl_extensions    = crl_ext
+default_crl_days  = 30  # Número de días hasta la próxima CRL
+
+[ policy_match ]
+countryName             = match
+organizationName        = match
+commonName              = supplied
+
+[ crl_ext ]
+authorityKeyIdentifier = keyid:always
+issuerAltName          = issuer:copy
