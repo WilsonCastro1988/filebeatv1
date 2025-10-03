@@ -1,6 +1,6 @@
 package com.banred.ms_middleware_signcrypt.controller;
 
-import com.banred.ms_middleware_signcrypt.model.EventoInterno;
+import com.banred.ms_middleware_signcrypt.domain.event.dto.EventoInterno;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;

@@ -1,6 +1,6 @@
 package com.banred.ms_middleware_signcrypt.components;
 
-import com.banred.ms_middleware_signcrypt.model.Institution;
+import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Institution;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +11,11 @@ import org.springframework.stereotype.Component;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.Security;
-import java.security.cert.*;
-import java.util.*;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
+import java.util.Enumeration;
+import java.util.List;
 
 @Component
 public class X509CertificateValidator {
@@ -52,7 +55,7 @@ public class X509CertificateValidator {
                 }
 
                 // Validar contra CRL
-                validateCertificateWithCRL(cert, institutionId);
+                //validateCertificateWithCRL(cert, institutionId);
             }
         }
     }

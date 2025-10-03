@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
@@ -15,9 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.Security;
-import java.security.cert.*;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @Component
@@ -38,12 +34,11 @@ public class CrlUpdater {
             // Agregar más URLs de CAs aquí
     );
 
-    private final Path crlDir = Path.of("F:\\Filebeat\\filebeatv1\\ms-middleware-signcrypt\\src\\main\\resources\\certs\\ca\\crl"); // carpeta local donde guardas las CRL
-    private final String crlFileName = "crl.der";
+    private final Path crlDir = Path.of("D:\\OneDrive - BANRED S.A\\Documentos\\Microservicios\\filebeatv1\\ms-middleware-signcrypt\\src\\main\\resources\\certs\\ca\\crl"); // carpeta local donde guardas las CRL
 
     private byte[] lastCRLHash = null;
 
-    @Scheduled(fixedRate = 60 * 1000) // cada minuto
+    @Scheduled(cron = "0 0 2 * * ?", zone = "America/Guayaquil")
     public void actualizarCRLs() {
         try {
             Security.addProvider(new BouncyCastleProvider());
@@ -57,6 +52,7 @@ public class CrlUpdater {
 
                     // Solo actualizar si hay cambios
                     if (lastCRLHash == null || !MessageDigest.isEqual(lastCRLHash, hash)) {
+                        String crlFileName = "crl.der";
                         Path crlPath = crlDir.resolve(crlFileName);
                         try (FileOutputStream fos = new FileOutputStream(crlPath.toFile())) {
                             fos.write(crlBytes);
