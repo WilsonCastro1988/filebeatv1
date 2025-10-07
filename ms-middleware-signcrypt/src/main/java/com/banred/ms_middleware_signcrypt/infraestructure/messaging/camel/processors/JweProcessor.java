@@ -31,15 +31,32 @@ public class JweProcessor implements Processor {
             String payload = exchange.getMessage().getBody(String.class);
 
             // Cifrar el contenido
+            //String encryptedData = cryptoService.encrypt(payload, institution);
+            //String[] split = encryptedData.split("::");
+
+
+            //exchange.getIn().setHeader("x-key", split[1]);
+
+            //logger.info("📤 Datos cifrados: {}", split[0]);
+
+            //exchange.setProperty("jweResponse", split[0]);
+            //exchange.getMessage().setBody(split[0]);
+
+            // Cifrar el contenido
             String encryptedData = cryptoService.encrypt(payload, institution);
-            String[] split = encryptedData.split("::");
+            JWEObject jweObject = JWEObject.parse(encryptedData);
+            String jweCompact = jweObject.serialize();
+            String xKey = (String) jweObject.getHeader().getCustomParam("x-key"); // Asume que CryptoService lo incluye
 
-            exchange.getIn().setHeader("x-key", split[1]);
+            if (xKey == null) {
+                throw new IllegalStateException("x-key no generado durante la encriptación");
+            }
 
-            logger.info("📤 Datos cifrados: {}", split[0]);
+            exchange.getIn().setHeader("x-key", xKey);
+            logger.info("📤 Datos cifrados (JWE): {}", jweCompact);
 
-            exchange.setProperty("jweResponse", split[0]);
-            exchange.getMessage().setBody(split[0]);
+            exchange.setProperty("jweResponse", jweCompact);
+            exchange.getMessage().setBody(jweCompact);
         } else {
             logger.debug("JWE no habilitado para institución {}", institution.getId());
         }

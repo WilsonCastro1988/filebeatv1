@@ -53,20 +53,19 @@ public class CryptoServiceImpl implements CryptoService {
     @Override
     public String encrypt(String payload, Institution client) throws Exception {
         try {
-            byte[] payloadBytes = payload.getBytes(StandardCharsets.UTF_8);
-            if (payloadBytes.length == 0) {
-                throw new IllegalArgumentException("Los bytes del payload están vacíos");
+            if (payload == null || payload.trim().isEmpty()) {
+                throw new IllegalArgumentException("Payload no puede estar vacío");
             }
-            LOGGER.debug("Payload: {}", payload);
-            LOGGER.debug("Payload bytes length: {}", payloadBytes.length);
+            LOGGER.debug("Iniciando encriptación JWE para payload: {}", payload);
 
             String llaveAES256 = aes256.generarLlave();
+            SecretKey aesKey = Utilities.fromBase64(llaveAES256, TipoArgorithm.AES.getValue());
+
             //String encryptedPayload = aes256.cifrar(payload, llaveAES256);
 
             String publicaRSA = rsa.getPublicKey(client.getId(), TipoCanal.IN.getValue(), TipoCertificado.PROVEEDOR.getValue(), client.getJwe().getTruststore());
             String llaveSimetrica = rsa.cifrar(llaveAES256, publicaRSA);
 
-            SecretKey aesKey = Utilities.fromBase64(llaveAES256, TipoArgorithm.AES.getValue());
             JWEHeader headerJw = new JWEHeader
                     .Builder(JWEAlgorithm.DIR, EncryptionMethod.A256GCM)
                     .customParam("x-key", llaveSimetrica)
@@ -78,7 +77,8 @@ public class CryptoServiceImpl implements CryptoService {
 
             LOGGER.debug("JWE generado: {}", objectJw.serialize().concat("::").concat(llaveSimetrica));
 
-            return objectJw.serialize().concat("::").concat(llaveSimetrica);
+            //return objectJw.serialize().concat("::").concat(llaveSimetrica);
+            return objectJw.serialize();
         } catch (Exception e) {
             LOGGER.debug("ERROR JWE generado: {}", e);
             throw new IllegalArgumentException("Header JWE inválido", e);
@@ -95,6 +95,7 @@ public class CryptoServiceImpl implements CryptoService {
 
         JWEObject jweObject = JWEObject.parse(jweCompact);
 
+        String xKeyBase64 = (String) jweObject.getHeader().getCustomParam("x-key");
         String llaveSimetrica = (String) jweObject.getHeader().toJSONObject().get("x-key");
         String base64PrivateKey = rsa.getPrivateKey(TipoCanal.IN.getValue(), institution.getId(), TipoCertificado.PRIVATE.getValue(), institution.getJwe().getKeystore());
         String llaveAES256 = rsa.descifrar(llaveSimetrica, base64PrivateKey);
@@ -102,12 +103,19 @@ public class CryptoServiceImpl implements CryptoService {
 
         jweObject.decrypt(new DirectDecrypter(aesKey));
 
+        String decryptedPayload = jweObject.getPayload().toString();
+
         //String response = aes256.descifrar(jweObject.getPayload().toString(), llaveAES256);
         return jweObject.getPayload().toString();
     }
 
     @Override
     public String sign(String payload, SecurityConfig jwsConfig) throws Exception {
+        if (payload == null || payload.trim().isEmpty()) {
+            throw new IllegalArgumentException("Payload no puede estar vacío");
+        }
+        LOGGER.debug("Iniciando firma JWS para payload: {}", payload);
+
         String base64PrivateKey = rsa.getPrivateKey(TipoCanal.IN.getValue(), null, TipoCertificado.PRIVATE.getValue(), jwsConfig.getKeystore());
         PrivateKey privateKey = toPrivateKey(base64PrivateKey, TipoArgorithm.RSA.getValue());
 
@@ -126,6 +134,10 @@ public class CryptoServiceImpl implements CryptoService {
 
     @Override
     public boolean verify(String jwsCompact, SecurityConfig jwsConfig) throws Exception {
+        if (jwsCompact == null || jwsCompact.trim().isEmpty()) {
+            throw new IllegalArgumentException("JWS compact no puede estar vacío");
+        }
+        LOGGER.debug("Iniciando verificación JWS: {}", jwsCompact);
 
         String base64PrivateKey = rsa.getPublicKey(TipoCanal.IN.getValue(), null, TipoCertificado.PUBLIC.getValue(), jwsConfig.getTruststore());
         PublicKey publicKey = toPublicKey(base64PrivateKey, TipoArgorithm.RSA.getValue());
