@@ -57,7 +57,7 @@ public class JwsProcessor implements Processor {
         if (institution.getJws() != null && institution.getJws().isEnable()) {
             logger.info("🔏 Aplicando JWS para institución {}", institution.getId());
 
-            String payload = exchange.getProperty("payload", String.class);
+            String payload = exchange.getMessage().getBody(String.class);
 
             // 1. Calcular digest
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
