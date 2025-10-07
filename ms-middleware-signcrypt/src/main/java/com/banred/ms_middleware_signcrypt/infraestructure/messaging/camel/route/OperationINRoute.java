@@ -33,15 +33,14 @@ public class OperationINRoute extends RouteBuilder {
                 .process(mtlsRequestProcessor)
                 .end()
                 .choice()
-                .when(simple("${exchangeProperty.institution.jws.enable} == true"))
-                .process(jwsVerifyProcessor) // verificación de firma
+                .when(simple("${exchangeProperty.institution.jwe.enable} == true"))
+                .process(jweDecryptProcessor) // Desencriptar JWE primero
                 .end()
                 .choice()
-                .when(simple("${exchangeProperty.institution.jwe.enable} == true"))
-                .process(jweDecryptProcessor) // desencriptar mensaje
+                .when(simple("${exchangeProperty.institution.jws.enable} == true"))
+                .process(jwsVerifyProcessor) // Verificar JWS después
                 .end()
                 .process(responseProcessor)
                 .log("✅ Procesamiento IN completo: ${body}");
-
     }
 }

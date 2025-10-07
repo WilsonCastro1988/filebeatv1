@@ -1,7 +1,9 @@
 package com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors;
 
+import com.banred.ms_middleware_signcrypt.domain.apim.dto.APIMRequestDTO;
 import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Institution;
 import com.banred.ms_middleware_signcrypt.domain.jw.service.CryptoService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.slf4j.Logger;
@@ -39,7 +41,8 @@ public class JweDecryptProcessor implements Processor {
                 throw new IllegalStateException("Header x-key no encontrado");
             }
 
-            String jwsCompact = cryptoService.decrypt(encryptedMessage, institution);
+            APIMRequestDTO obj = jsonToDtoConverter(encryptedMessage);
+            String jwsCompact = cryptoService.decrypt(obj.getData(), institution);
             logger.info("📤 Datos descifrados: {}", jwsCompact);
 
 
@@ -47,6 +50,16 @@ public class JweDecryptProcessor implements Processor {
             exchange.getMessage().setBody(jwsCompact);
         } else {
             logger.debug("JWE no habilitado para institución {}", institution.getId());
+        }
+    }
+
+    public static APIMRequestDTO jsonToDtoConverter(String jsonObject) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readValue(jsonObject, APIMRequestDTO.class);
+        } catch (Exception e) {
+            logger.error("ERROR from InstitutionLookUpProcessor", e);
+            return null;
         }
     }
 }

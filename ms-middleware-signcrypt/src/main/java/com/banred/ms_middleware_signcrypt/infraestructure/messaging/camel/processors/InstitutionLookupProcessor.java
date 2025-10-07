@@ -37,7 +37,6 @@ public class InstitutionLookupProcessor implements Processor {
             }
 
             exchange.getIn().setHeader("ifiEndpoint", institution.getEndpoint());
-            exchange.getIn().setHeader("xEntityID", institution.getId());
             exchange.getIn().setHeader("timestamp_in", getDateStringISO8601(new Date()));
 
             // Pasar institución completa al Exchange si se necesita después
