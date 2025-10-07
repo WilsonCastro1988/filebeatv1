@@ -81,3 +81,4 @@ microservice:
     RUTA_CONFIG_XML: ${RUTA_CONFIG_XML:C:/etc/tls/config-service.xml}
     RUTA_CRL: ${RUTA_CRL:certs/ca/crl/crl.der}
     RUTA_RSA: ${RUTA_CRL:C:/etc/tls/rsa-keys}
+    EXPIRY_SECONDS: ${EXPIRY_SECONDS:300}

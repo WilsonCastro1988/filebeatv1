@@ -16,6 +16,7 @@ public class MicroserviceProperties {
     private String RUTA_CONFIG_XML;
     private String RUTA_CRL;
     private String RUTA_RSA;
+    private long EXPIRY_SECONDS;
 
 
 }

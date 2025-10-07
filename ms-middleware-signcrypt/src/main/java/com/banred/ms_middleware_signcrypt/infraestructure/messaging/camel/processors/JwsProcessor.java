@@ -2,11 +2,13 @@ package com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.proce
 
 import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Institution;
 import com.banred.ms_middleware_signcrypt.domain.jw.service.CryptoService;
+import com.banred.ms_middleware_signcrypt.infraestructure.config.MicroserviceProperties;
 import com.nimbusds.jose.JWSObject;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -18,12 +20,14 @@ import java.util.Base64;
 public class JwsProcessor implements Processor {
 
     private static final Logger logger = LoggerFactory.getLogger(JwsProcessor.class);
-    private static final long EXPIRY_SECONDS = 300; // 5 minutos de validez
 
+
+    private final MicroserviceProperties msProperties;
     private final CryptoService cryptoService;
 
-    public JwsProcessor(CryptoService cryptoService) {
+    public JwsProcessor(CryptoService cryptoService, MicroserviceProperties msProperties) {
         this.cryptoService = cryptoService;
+        this.msProperties = msProperties;
     }
 
     //@Override
@@ -62,9 +66,8 @@ public class JwsProcessor implements Processor {
 
             // 2. Construir Signature-Input
             long created = Instant.now().getEpochSecond();
-            long expires = created + EXPIRY_SECONDS;
-            String signatureInput = "sig1=(\"digest\");created=" + created + ";keyid=\"" + institution.getId() + "\";alg=\"rsa-sha256\";expires=" + expires;
-
+            long expires = created + msProperties.getEXPIRY_SECONDS();
+            String signatureInput = "sig1=('digest');created=" + created + ";keyid='" + institution.getId() + "';alg='rsa-sha256';expires=" + expires;
             // 3. Construir cadena a firmar y firmar con JWS
             String toSign = digestHeader + "\n" + signatureInput;
             String jwsCompact = cryptoService.sign(toSign, institution.getJws());

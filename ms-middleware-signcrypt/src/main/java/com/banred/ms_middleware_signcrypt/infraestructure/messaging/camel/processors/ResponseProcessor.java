@@ -20,33 +20,47 @@ public class ResponseProcessor implements Processor {
 
     private static final Logger logger = LoggerFactory.getLogger(ResponseProcessor.class);
 
-
     @Override
     public void process(Exchange exchange) throws ParseException {
+        try {
+            // 1. Construir la respuesta inicial
+            String responseBody = exchange.getMessage().getBody(String.class);
+            String xEntityID = exchange.getIn().getHeader("X-Entity-ID", String.class);
+            String xKey = exchange.getIn().getHeader("x-key", String.class);
+            String timestampIn = exchange.getIn().getHeader("timestamp_in", String.class);
+            String signatureInput = exchange.getIn().getHeader("Signature-Input", String.class);
+            String digest = exchange.getIn().getHeader("digest", String.class);
+            String signature = exchange.getIn().getHeader("Signature", String.class);
 
-        String responseBody = exchange.getMessage().getBody(String.class);
-        String xEntityID = exchange.getIn().getHeader("xEntityID").toString();
-        String xkey = exchange.getIn().getHeader("x-key").toString();
-        String toIN = exchange.getIn().getHeader("timestamp_in").toString();
-        String ssInput = exchange.getProperty("sign.Signature-Input", String.class);
-        String ssDigest = exchange.getProperty("sign.digest", String.class);
-        String ssSignature = exchange.getProperty("sign.Signature", String.class);
+            SignatureDTO signatureDTO = new SignatureDTO();
+            signatureDTO.setDigest(digest);
+            signatureDTO.setSignature(signature);
+            signatureDTO.setSignatureInput(signatureInput);
 
-        SignatureDTO signatureDTO = new SignatureDTO();
-        signatureDTO.setDigest(ssDigest);
-        signatureDTO.setSignature(ssSignature);
-        signatureDTO.setSignatureInput(ssInput);
+            APIMResponseDTO dto = new APIMResponseDTO();
+            dto.setxEntityID(xEntityID);
+            dto.setxKey(xKey);
+            dto.setPayload(responseBody);
+            dto.setStatus(StatusResponse.SUCCESS.getValue());
+            dto.setTimestamp_OUT(getDateStringISO8601(new Date()));
+            dto.setTimestamp_IN(timestampIn);
+            dto.setSign(signatureDTO);
 
-        APIMResponseDTO dto = new APIMResponseDTO();
-        dto.setxEntityID(xEntityID);
-        dto.setxKey(xkey);
-        dto.setPayload(responseBody);
-        dto.setStatus(StatusResponse.SUCCESS.getValue());
-        dto.setTimestamp_OUT(getDateStringISO8601(new Date()));
-        dto.setTimestamp_IN(toIN);
-        dto.setSign(signatureDTO);
+            Gson gson = new Gson();
+            String requestBody = gson.toJson(dto);
+            logger.debug("Respuesta preparada: {}", requestBody);
 
-        Gson gson = new Gson();
-        exchange.getMessage().setBody(gson.toJson(dto));
+            // 2. Actualizar el cuerpo del Exchange con el JSON preparado
+            exchange.getMessage().setBody(requestBody);
+
+        } catch (Exception e) {
+            logger.error("Error al construir la respuesta: {}", e.getMessage(), e);
+            APIMResponseDTO errorDto = new APIMResponseDTO();
+            errorDto.setStatus(StatusResponse.ERROR.getValue());
+            errorDto.setTimestamp_OUT(getDateStringISO8601(new Date()));
+            errorDto.setPayload("Error al construir la respuesta: " + e.getMessage());
+            exchange.getMessage().setBody(new Gson().toJson(errorDto));
+            throw new RuntimeException("Fallo al construir la respuesta", e);
+        }
     }
 }
