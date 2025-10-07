@@ -2,36 +2,50 @@ package com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.proce
 
 
 import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Institution;
-import com.banred.ms_middleware_signcrypt.domain.mtls.service.RestTemplateService;
+import com.banred.ms_middleware_signcrypt.domain.mtls.service.WebClientService;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.springframework.http.ResponseEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import java.time.Duration;
 
 @Component
 public class MtlsProcessor implements Processor {
 
-    private final RestTemplateService restTemplateService;
 
-    public MtlsProcessor(RestTemplateService restTemplateService) {
-        this.restTemplateService = restTemplateService;
+    private static final Logger logger = LoggerFactory.getLogger(MtlsProcessor.class);
+
+    private final WebClientService webClientService;
+
+    public MtlsProcessor(WebClientService webClientService) {
+        this.webClientService = webClientService;
     }
 
     @Override
-    public void process(Exchange exchange) {
-        try {
-            Institution institution = exchange.getProperty("institution", Institution.class);
-            String endpoint = exchange.getIn().getHeader("ifiEndpoint", String.class);
+    public void process(Exchange exchange) throws Exception {
+        Institution institution = exchange.getProperty("institution", Institution.class);
 
-            RestTemplate restTemplate = restTemplateService.getRestTemplate(institution);
-            ResponseEntity<String> response = restTemplate.getForEntity(endpoint, String.class);
+        if (institution.getMtls() != null && institution.getMtls().isEnable()) {
+            logger.info("🔐 Ejecutando llamada MTLS para institución {}", institution.getId());
 
-            exchange.getIn().setBody(response.getBody());
-        }catch (Exception e){
-            exchange.setException(e);
+            WebClient webClient = webClientService.createWebClient(institution);
+
+            String responseBody = webClient.get()
+                    .uri(institution.getEndpoint())
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block(Duration.ofMillis(institution.getTimeout()));
+
+            logger.info("📥 Respuesta MTLS: {}", responseBody);
+
+            exchange.setProperty("mtlsResponse", responseBody);
+            exchange.getMessage().setBody(responseBody);
+        } else {
+            logger.warn("⚠️ MTLS no habilitado para institución {}", institution.getId());
         }
-
-
     }
+
 }

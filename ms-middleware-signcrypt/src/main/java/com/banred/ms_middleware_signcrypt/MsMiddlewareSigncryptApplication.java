@@ -6,6 +6,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Scanner;
 
 @SpringBootApplication
@@ -43,6 +46,5 @@ public class MsMiddlewareSigncryptApplication {
         System.out.println("Dato Decifrado (Base64): " + aes256Gcm.descifrar(datoCifrado, llaveSimetrica));
 
         System.out.println("<==========================================>");
-
     }
 }

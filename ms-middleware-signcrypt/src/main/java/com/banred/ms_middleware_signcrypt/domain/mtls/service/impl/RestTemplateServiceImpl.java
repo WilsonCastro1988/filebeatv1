@@ -73,7 +73,7 @@ public class RestTemplateServiceImpl implements RestTemplateService {
             kmf.init(keyStore, keystorePassword);
 
             // Cargar truststore
-            KeyStore trustStore = KeyStore.getInstance("PKCS12");
+            KeyStore trustStore = KeyStore.getInstance("JKS");
             truststorePassword = decrypt(institution.getMtls().getTruststorePassword()).toCharArray();
             try (FileInputStream fis = new FileInputStream(institution.getMtls().getTruststore())) {
                 trustStore.load(fis, truststorePassword);

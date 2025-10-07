@@ -2,12 +2,18 @@ package com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.proce
 
 import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Institution;
 import com.banred.ms_middleware_signcrypt.domain.jw.service.CryptoService;
+import com.nimbusds.jose.JWEObject;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JweProcessor implements Processor {
+
+
+    private static final Logger logger = LoggerFactory.getLogger(JweProcessor.class);
 
     private final CryptoService cryptoService;
 
@@ -17,16 +23,26 @@ public class JweProcessor implements Processor {
 
     @Override
     public void process(Exchange exchange) throws Exception {
-        try {
-            Institution institution = exchange.getProperty("institution", Institution.class);
-            String body = exchange.getIn().getBody(String.class);
+        Institution institution = exchange.getProperty("institution", Institution.class);
 
-            String encrypted = cryptoService.encrypt(body, institution);
+        if (institution.getJwe() != null && institution.getJwe().isEnable()) {
+            logger.info("🔐 Aplicando JWE para institución {}", institution.getId());
 
-            exchange.getIn().setBody(encrypted);
-        }catch (Exception e) {
-            exchange.setException(e);
+            String payload = exchange.getMessage().getBody(String.class);
+
+            // Cifrar el contenido
+            String encryptedData = cryptoService.encrypt(payload, institution);
+            String[] split = encryptedData.split("::");
+
+            exchange.getIn().setHeader("x-key", split[1]);
+
+            logger.info("📤 Datos cifrados: {}", split[0]);
+
+            exchange.setProperty("jweResponse", split[0]);
+            exchange.getMessage().setBody(split[0]);
+        } else {
+            logger.debug("JWE no habilitado para institución {}", institution.getId());
         }
-
     }
+
 }

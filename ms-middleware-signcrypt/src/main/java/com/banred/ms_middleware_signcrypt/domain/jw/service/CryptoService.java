@@ -16,6 +16,4 @@ public interface CryptoService {
 
     String decrypt(String jweCompact, Institution client) throws Exception;
 
-    String encryptData(String payload) throws Exception;
-
 }

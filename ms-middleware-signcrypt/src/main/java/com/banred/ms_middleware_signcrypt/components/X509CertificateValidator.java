@@ -55,7 +55,7 @@ public class X509CertificateValidator {
                 }
 
                 // Validar contra CRL
-                //validateCertificateWithCRL(cert, institutionId);
+                validateCertificateWithCRL(cert, institutionId);
             }
         }
     }
@@ -94,7 +94,7 @@ public class X509CertificateValidator {
     private void validateCertificateWithCRL(X509Certificate cert, String institutionId) throws Exception {
         Security.addProvider(new BouncyCastleProvider());
         CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
-
+        //CertificateFactory cf = CertificateFactory.getInstance("X.509");
         try (InputStream in = new ClassPathResource(rutaCRL).getInputStream()) {
             X509CRL crl = (X509CRL) cf.generateCRL(in);
 
@@ -109,6 +109,9 @@ public class X509CertificateValidator {
                 logger.info("✅ Certificado no revocado para institución {}, sujeto {}",
                         institutionId, cert.getSubjectX500Principal());
             }
+        }catch (Exception e){
+            logger.error("❌ ERROR Certificado no revocado para institución {} ",
+                    e);
         }
     }
 }

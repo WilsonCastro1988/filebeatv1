@@ -1,0 +1,75 @@
+# Ignorar archivos compilados y directorios de build
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Ignorar archivos de configuración de Maven
+/.mvn/wrapper/maven-wrapper.properties
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Ignorar archivos de configuración de Gradle
+.gradle/
+build/
+!.gradle/wrapper/gradle-wrapper.jar
+!.gradle/wrapper/gradle-wrapper.properties
+
+# Ignorar archivos generados por el IDE
+.idea/
+*.iws
+*.iml
+*.ipr
+*.class
+
+# Ignorar archivos de configuración local (Spring Boot)
+#application.properties
+#application.yml
+#application-*.properties
+#application-*.yml
+
+# Ignorar archivos de logs
+logs/
+*.log
+
+# Ignorar archivos temporales y de sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar claves y secretos (si usas un archivo separado)
+*.key
+*.pem
+*.jks
+*.keystore
+
+# Ignorar archivos de pruebas locales o configuraciones específicas
+settings.gradle.kts
+settings.gradle
+
+# Ignorar directorios de dependencias locales (si no usas un repositorio central)
+~/.m2/
+~/.gradle/
+
+# Ignorar archivos de cobertura de pruebas (si usas herramientas como JaCoCo)
+*.exec
+jacoco*.csv
+jacoco*.xml
+
+# Ignorar archivos generados por Docker (si applies)
+#Dockerfile
+#docker-compose.yml
+.dockerignore
+
+# Ignorar archivos de documentación generada (si applies)
+apidocs/
+docs/
+
+# Ignorar archivos de configuración de despliegue local
+deploy/
+
+# Incluir excepciones (archivos que sí quieres versionar)
+!src/

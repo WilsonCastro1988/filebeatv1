@@ -14,8 +14,10 @@ import com.banred.ms_middleware_signcrypt.domain.jw.service.aes256.IAes256;
 import com.banred.ms_middleware_signcrypt.domain.jw.service.rsa.IRsa;
 import com.banred.ms_middleware_signcrypt.domain.jw.service.rsa.Rsa;
 import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.*;
-import org.bouncycastle.crypto.CryptoException;
+import com.nimbusds.jose.crypto.DirectDecrypter;
+import com.nimbusds.jose.crypto.DirectEncrypter;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,130 +49,90 @@ public class CryptoServiceImpl implements CryptoService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CryptoServiceImpl.class);
 
-    @Override
-    public String encryptData(String payload) throws Exception {
-        if (payload == null || payload.isEmpty()) {
-            throw new IllegalArgumentException("El payload no puede ser nulo o vacío");
-        }
-        Institution institution = institutionRedisService.getInstitution(payload);
-        return encrypt(payload, institution);
-    }
-
 
     @Override
     public String encrypt(String payload, Institution client) throws Exception {
         try {
-            // 1) Obtener la clave pública RSA del cliente (proveedor)
-            String pubKeyBase64 = rsa.getPublicKey(client.getId(), TipoCanal.IN.getValue(),
-                    TipoCertificado.PROVEEDOR.getValue(), client.getJwe().getTruststore());
-            PublicKey pub = toPublicKey(pubKeyBase64, TipoArgorithm.RSA.getValue());
-            if (!(pub instanceof RSAPublicKey)) {
-                throw new CryptoException("Clave pública no es RSA");
+            byte[] payloadBytes = payload.getBytes(StandardCharsets.UTF_8);
+            if (payloadBytes.length == 0) {
+                throw new IllegalArgumentException("Los bytes del payload están vacíos");
             }
+            LOGGER.debug("Payload: {}", payload);
+            LOGGER.debug("Payload bytes length: {}", payloadBytes.length);
 
-            // 2) (Opcional) firmar payload con JWS antes de cifrar (si se requiere)
-            // Si necesitas firmar: payload = sign(payload, ...);
+            String llaveAES256 = aes256.generarLlave();
+            //String encryptedPayload = aes256.cifrar(payload, llaveAES256);
 
-            // 3) Construir JWE híbrido: ALG = RSA-OAEP-256, ENC = A256GCM
-            JWEHeader header = new JWEHeader.Builder(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A256GCM)
-                    .contentType("JWT") // o "text/plain" según sea
+            String publicaRSA = rsa.getPublicKey(client.getId(), TipoCanal.IN.getValue(), TipoCertificado.PROVEEDOR.getValue(), client.getJwe().getTruststore());
+            String llaveSimetrica = rsa.cifrar(llaveAES256, publicaRSA);
+
+            SecretKey aesKey = Utilities.fromBase64(llaveAES256, TipoArgorithm.AES.getValue());
+            JWEHeader headerJw = new JWEHeader
+                    .Builder(JWEAlgorithm.DIR, EncryptionMethod.A256GCM)
+                    .customParam("x-key", llaveSimetrica)
                     .build();
 
-            JWEObject jwe = new JWEObject(header, new Payload(payload));
+            Payload payloadJw = new Payload(payload);
+            JWEObject objectJw = new JWEObject(headerJw, payloadJw);
+            objectJw.encrypt(new DirectEncrypter(aesKey));
 
-            // 4) Encriptar con RSA en el campo encrypted_key (híbrido)
-            RSAEncrypter encrypter = new RSAEncrypter((RSAPublicKey) pub);
-            jwe.encrypt(encrypter);
+            LOGGER.debug("JWE generado: {}", objectJw.serialize().concat("::").concat(llaveSimetrica));
 
-            String serialized = jwe.serialize();
-            // No loggear payload ni claves
-            LOGGER.debug("JWE generado para institución {}", client.getId());
-            return serialized;
-
+            return objectJw.serialize().concat("::").concat(llaveSimetrica);
         } catch (Exception e) {
-            LOGGER.error("Error en encrypt", e);
-            throw new CryptoException("Error al encriptar payload", e);
+            LOGGER.debug("ERROR JWE generado: {}", e);
+            throw new IllegalArgumentException("Header JWE inválido", e);
         }
     }
 
     @Override
     public String decrypt(String jweCompact, Institution institution) throws Exception {
+
         if (jweCompact == null || jweCompact.isEmpty()) {
             throw new IllegalArgumentException("El JWE compact no puede ser nulo o vacío");
         }
-        if (institution == null) throw new IllegalArgumentException("institution es null");
+        LOGGER.debug("JWE recibido: {}", jweCompact);
 
-        try {
-            // 1) Cargar clave privada del keystore mediante tu servicio RSA
-            String privateKeyBase64 = rsa.getPrivateKey(TipoCanal.IN.getValue(), institution.getId(),
-                    TipoCertificado.PRIVATE.getValue(), institution.getJwe().getKeystore());
-            PrivateKey privateKey = toPrivateKey(privateKeyBase64, TipoArgorithm.RSA.getValue());
+        JWEObject jweObject = JWEObject.parse(jweCompact);
 
-            JWEObject jweObject = JWEObject.parse(jweCompact);
+        String llaveSimetrica = (String) jweObject.getHeader().toJSONObject().get("x-key");
+        String base64PrivateKey = rsa.getPrivateKey(TipoCanal.IN.getValue(), institution.getId(), TipoCertificado.PRIVATE.getValue(), institution.getJwe().getKeystore());
+        String llaveAES256 = rsa.descifrar(llaveSimetrica, base64PrivateKey);
+        SecretKey aesKey = Utilities.fromBase64(llaveAES256, TipoArgorithm.AES.getValue());
 
-            // Validamos que el algoritmo sea el esperado (opcional)
-            if (!JWEAlgorithm.RSA_OAEP_256.equals(jweObject.getHeader().getAlgorithm())) {
-                LOGGER.warn("Algoritmo JWE inesperado: {}", jweObject.getHeader().getAlgorithm());
-            }
+        jweObject.decrypt(new DirectDecrypter(aesKey));
 
-            // 2) Desencriptar con RSADecrypter — Nimbus se encarga de CEK
-            RSADecrypter decrypter = new RSADecrypter(privateKey);
-            jweObject.decrypt(decrypter);
-
-            String payload = jweObject.getPayload().toString();
-            // Si era JWS firmado antes de cifrar, verificar aquí con verify(...)
-            LOGGER.debug("JWE desencriptado para institución {}", institution.getId());
-            return payload;
-
-        } catch (JOSEException e) {
-            LOGGER.error("Error JOSE al desencriptar", e);
-            throw new CryptoException("Error JOSE al desencriptar JWE", e);
-        } catch (Exception e) {
-            LOGGER.error("Error al desencriptar JWE", e);
-            throw new CryptoException("Error al desencriptar JWE", e);
-        }
+        //String response = aes256.descifrar(jweObject.getPayload().toString(), llaveAES256);
+        return jweObject.getPayload().toString();
     }
-
-    // -------------------------
-    // JWS (Firma / Verify)
-    // -------------------------
 
     @Override
     public String sign(String payload, SecurityConfig jwsConfig) throws Exception {
-        if (payload == null) throw new IllegalArgumentException("payload null");
-        try {
-            String base64Priv = rsa.getPrivateKey(TipoCanal.IN.getValue(), null, TipoCertificado.PRIVATE.getValue(), jwsConfig.getKeystore());
-            PrivateKey priv = toPrivateKey(base64Priv, TipoArgorithm.RSA.getValue());
+        String base64PrivateKey = rsa.getPrivateKey(TipoCanal.IN.getValue(), null, TipoCertificado.PRIVATE.getValue(), jwsConfig.getKeystore());
+        PrivateKey privateKey = toPrivateKey(base64PrivateKey, TipoArgorithm.RSA.getValue());
 
-            JWSAlgorithm jwsAlg = JWSAlgorithm.RS256; // o parse desde jwsConfig
-            JWSObject jws = new JWSObject(new JWSHeader.Builder(jwsAlg).type(JOSEObjectType.JWT).build(),
-                    new Payload(payload));
+        JWSObject jwsObject = new JWSObject(
+                new JWSHeader.Builder(JWSAlgorithm.RS256)
+                        .type(JOSEObjectType.JWT)
+                        .build(),
+                new Payload(payload)
+        );
 
-            JWSSigner signer = new RSASSASigner(priv);
-            jws.sign(signer);
-            LOGGER.debug("JWS generado (no logear contenido)");
-            return jws.serialize();
-        } catch (Exception e) {
-            LOGGER.error("Error firmando JWS", e);
-            throw new CryptoException("Error firmando JWS", e);
-        }
+        JWSSigner signer = new RSASSASigner(privateKey);
+        jwsObject.sign(signer);
+
+        return jwsObject.serialize();
     }
 
     @Override
     public boolean verify(String jwsCompact, SecurityConfig jwsConfig) throws Exception {
-        if (jwsCompact == null) throw new IllegalArgumentException("jwsCompact null");
-        try {
-            String base64Pub = rsa.getPublicKey(TipoCanal.IN.getValue(), null, TipoCertificado.PUBLIC.getValue(), jwsConfig.getKeystore());
-            PublicKey pub = toPublicKey(base64Pub, TipoArgorithm.RSA.getValue());
 
-            JWSObject jws = JWSObject.parse(jwsCompact);
-            JWSVerifier verifier = new RSASSAVerifier((RSAPublicKey) pub);
-            boolean ok = jws.verify(verifier);
-            LOGGER.debug("Verificación JWS: {}", ok);
-            return ok;
-        } catch (Exception e) {
-            LOGGER.error("Error verificando JWS", e);
-            throw new CryptoException("Error verificando JWS", e);
-        }
+        String base64PrivateKey = rsa.getPublicKey(TipoCanal.IN.getValue(), null, TipoCertificado.PUBLIC.getValue(), jwsConfig.getTruststore());
+        PublicKey publicKey = toPublicKey(base64PrivateKey, TipoArgorithm.RSA.getValue());
+
+        JWSObject jwsObject = JWSObject.parse(jwsCompact);
+
+        JWSVerifier verifier = new RSASSAVerifier((RSAPublicKey) publicKey);
+        return jwsObject.verify(verifier);
     }
 }
