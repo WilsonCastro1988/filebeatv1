@@ -30,6 +30,16 @@ public class ApimController {
 
     }
 
+    @PostMapping("middlewarein/operation")
+    public String middlewareIN(@RequestHeader HttpHeaders headers, @NotBlank @RequestBody String payload) {
+        Map<String, Object> headerMap = new HashMap<>();
+        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+            headerMap.put(entry.getKey(), entry.getValue().get(0)); // Tomar el primer valor si hay múltiples
+        }
+        return producerTemplate.requestBodyAndHeaders("direct:raw-api-in", payload, headerMap, String.class);
+
+    }
+
     @PostMapping("/operation")
     public String apim(@Valid @RequestBody String payload, @RequestHeader HttpHeaders headers) {
         try {
