@@ -15,13 +15,13 @@ import static com.banred.ms_middleware_signcrypt.common.util.Utilities.getDateSt
 import static com.banred.ms_middleware_signcrypt.common.util.Utilities.jsonToDtoConverter;
 
 @Component
-public class InstitutionLookupProcessor implements Processor {
+public class MiddlewareLookupProcessor implements Processor {
 
-    private static final Logger logger = LoggerFactory.getLogger(InstitutionLookupProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(MiddlewareLookupProcessor.class);
 
     private final IInstitutionRedisService institutionRedisService;
 
-    public InstitutionLookupProcessor(IInstitutionRedisService institutionRedisService) {
+    public MiddlewareLookupProcessor(IInstitutionRedisService institutionRedisService) {
         this.institutionRedisService = institutionRedisService;
     }
 

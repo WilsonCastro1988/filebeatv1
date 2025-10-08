@@ -32,13 +32,8 @@ public class JweDecryptProcessor implements Processor {
 
             String encryptedMessage = exchange.getMessage().getBody(String.class);
 
-            String xKey = (String) exchange.getIn().getHeader("x-key");
-
             if (encryptedMessage == null || encryptedMessage.trim().isEmpty()) {
                 throw new IllegalArgumentException("Mensaje cifrado no puede estar vacío");
-            }
-            if (xKey == null) {
-                throw new IllegalStateException("Header x-key no encontrado");
             }
 
             APIMRequestDTO obj = jsonToDtoConverter(encryptedMessage);

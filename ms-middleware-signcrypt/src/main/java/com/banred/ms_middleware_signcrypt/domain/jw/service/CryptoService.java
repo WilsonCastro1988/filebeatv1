@@ -2,9 +2,7 @@ package com.banred.ms_middleware_signcrypt.domain.jw.service;
 
 import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Institution;
 import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.SecurityConfig;
-
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
+import com.banred.ms_middleware_signcrypt.domain.jw.dto.JWSResponse;
 
 public interface CryptoService {
 
@@ -15,5 +13,10 @@ public interface CryptoService {
     boolean verify(String jwsCompact, SecurityConfig jwsConfig) throws Exception;
 
     String decrypt(String jweCompact, Institution client) throws Exception;
+
+    JWSResponse signWithHeaders(String payload, Institution client) throws Exception;
+
+    void verifyWithHeaders(String jwsCompact, String digestHeader, String signatureInput, Institution institution) throws Exception;
+
 
 }

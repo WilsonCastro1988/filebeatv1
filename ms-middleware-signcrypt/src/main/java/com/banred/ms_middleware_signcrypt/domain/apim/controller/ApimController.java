@@ -21,16 +21,18 @@ public class ApimController {
 
 
     @PostMapping("middleware/operation")
-    public String middleware(@RequestHeader("xEntityID") String encryptedSecretKey,@NotBlank @RequestBody String payload) {
-
-            return producerTemplate.requestBody("direct:operation_in", encryptedSecretKey, String.class);
+    public String middleware(@RequestHeader HttpHeaders headers, @NotBlank @RequestBody String payload) {
+        Map<String, Object> headerMap = new HashMap<>();
+        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+            headerMap.put(entry.getKey(), entry.getValue().get(0)); // Tomar el primer valor si hay múltiples
+        }
+        return producerTemplate.requestBodyAndHeaders("direct:raw-api", payload, headerMap, String.class);
 
     }
 
     @PostMapping("/operation")
-    public String apim(@Valid @RequestBody String payload, @RequestHeader HttpHeaders headers){
+    public String apim(@Valid @RequestBody String payload, @RequestHeader HttpHeaders headers) {
         try {
-            // Pasar el payload y los headers al flujo Camel
             Map<String, Object> headerMap = new HashMap<>();
             for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
                 headerMap.put(entry.getKey(), entry.getValue().get(0)); // Tomar el primer valor si hay múltiples

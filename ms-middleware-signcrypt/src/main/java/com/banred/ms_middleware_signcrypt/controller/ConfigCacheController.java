@@ -19,8 +19,8 @@ public class ConfigCacheController {
         this.applicationEventPublisher = applicationEventPublisher;
     }
     
-    @PostMapping("path")
-    public ResponseEntity<String> publisEvent(@RequestBody EventoInterno entity) {
+    @PostMapping("rechargecacheinformation")
+    public ResponseEntity<String> rechargecacheinformation(@RequestBody EventoInterno entity) {
 
         try {
             this.applicationEventPublisher.publishEvent(new EventoInterno(entity.getTipo(), entity.getTimestamp()));

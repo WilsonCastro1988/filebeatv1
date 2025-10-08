@@ -1,95 +1,54 @@
 package com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors;
 
 import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Institution;
+import com.banred.ms_middleware_signcrypt.domain.jw.dto.JWSResponse;
 import com.banred.ms_middleware_signcrypt.domain.jw.service.CryptoService;
-import com.banred.ms_middleware_signcrypt.infraestructure.config.MicroserviceProperties;
-import com.nimbusds.jose.JWSObject;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.time.Instant;
-import java.util.Base64;
 
 @Component
 public class JwsProcessor implements Processor {
 
     private static final Logger logger = LoggerFactory.getLogger(JwsProcessor.class);
-
-
-    private final MicroserviceProperties msProperties;
     private final CryptoService cryptoService;
 
-    public JwsProcessor(CryptoService cryptoService, MicroserviceProperties msProperties) {
+    public JwsProcessor(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
-        this.msProperties = msProperties;
-    }
-
-    //@Override
-    public void process2(Exchange exchange) throws Exception {
-        Institution institution = exchange.getProperty("institution", Institution.class);
-
-        if (institution.getJws() != null && institution.getJws().isEnable()) {
-            logger.info("🔏 Aplicando JWS para institución {}", institution.getId());
-
-            String body = exchange.getMessage().getBody(String.class);
-
-            // Firmar el contenido
-            String signedData = cryptoService.sign(body, institution.getJws());
-            logger.info("📤 Datos firmados (JWS): {}", signedData);
-
-            exchange.setProperty("jwsResponse", signedData);
-            exchange.getMessage().setBody(signedData);
-        } else {
-            logger.debug("JWS no habilitado para institución {}", institution.getId());
-        }
     }
 
     @Override
     public void process(Exchange exchange) throws Exception {
         Institution institution = exchange.getProperty("institution", Institution.class);
 
-        if (institution.getJws() != null && institution.getJws().isEnable()) {
-            logger.info("🔏 Aplicando JWS para institución {}", institution.getId());
+        if (institution == null || institution.getJws() == null || !institution.getJws().isEnable()) {
+            logger.debug("⚠️ JWS no habilitado para esta institución o configuración inválida.");
+            return;
+        }
 
-            String payload = exchange.getMessage().getBody(String.class);
+        String payload = exchange.getMessage().getBody(String.class);
+        logger.info("🔏 Aplicando JWS para institución {}", institution.getId());
 
-            // 1. Calcular digest
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            String digestBase64 = Base64.getEncoder().encodeToString(digest.digest(payload.getBytes(StandardCharsets.UTF_8)));
-            String digestHeader = "SHA-256=" + digestBase64;
+        try {
+            // 🔹 Firma y genera todos los encabezados en un solo paso
+            JWSResponse jwsResponse = cryptoService.signWithHeaders(payload, institution);
 
-            // 2. Construir Signature-Input
-            long created = Instant.now().getEpochSecond();
-            long expires = created + msProperties.getEXPIRY_SECONDS();
-            String signatureInput = "sig1=('digest');created=" + created + ";keyid='" + institution.getId() + "';alg='rsa-sha256';expires=" + expires;
-            // 3. Construir cadena a firmar y firmar con JWS
-            String toSign = digestHeader + "\n" + signatureInput;
-            String jwsCompact = cryptoService.sign(toSign, institution.getJws());
-
-            // 4. Extraer y formatear la firma
-            JWSObject jwsObject = JWSObject.parse(jwsCompact);
-            String signature = Base64.getEncoder().encodeToString(jwsObject.getSignature().decode());
-            String signatureHeader = "sig1=" + signature;
-
-            // 5. Guardar en headers del Exchange
-            exchange.getIn().setHeader("Signature-Input", signatureInput);
-            exchange.getIn().setHeader("digest", digestHeader);
-            exchange.getIn().setHeader("Signature", signatureHeader);
+            // 🔹 Asignar headers al Exchange
+            exchange.getIn().setHeader("digest", jwsResponse.getDigestHeader());
+            exchange.getIn().setHeader("Signature-Input", jwsResponse.getSignatureInput());
+            exchange.getIn().setHeader("Signature", jwsResponse.getSignatureHeader());
             exchange.getIn().setHeader("X-Entity-ID", institution.getId());
 
-            // 6. Actualizar body con el JWS completo
-            exchange.getMessage().setBody(jwsCompact);
-            exchange.setProperty("jwsResponse", jwsCompact);
+            // 🔹 Colocar el cuerpo firmado
+            exchange.getMessage().setBody(jwsResponse.getJwsCompact());
+            exchange.setProperty("jwsResponse", jwsResponse.getJwsCompact());
 
-            logger.info("📤 Datos firmados (JWS): {}", jwsCompact);
-        } else {
-            logger.debug("JWS no habilitado para institución {}", institution.getId());
+            logger.info("📤 JWS generado y aplicado exitosamente.");
+        } catch (Exception e) {
+            logger.error("❌ Error al aplicar JWS: {}", e.getMessage(), e);
+            exchange.setException(e);
         }
     }
 }

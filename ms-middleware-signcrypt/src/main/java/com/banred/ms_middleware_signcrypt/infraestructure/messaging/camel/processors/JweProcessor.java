@@ -23,42 +23,34 @@ public class JweProcessor implements Processor {
 
     @Override
     public void process(Exchange exchange) throws Exception {
-        Institution institution = exchange.getProperty("institution", Institution.class);
+        try {
+            Institution institution = exchange.getProperty("institution", Institution.class);
 
-        if (institution.getJwe() != null && institution.getJwe().isEnable()) {
-            logger.info("🔐 Aplicando JWE para institución {}", institution.getId());
+            if (institution.getJwe() != null && institution.getJwe().isEnable()) {
+                logger.info("🔐 Aplicando JWE para institución {}", institution.getId());
 
-            String payload = exchange.getMessage().getBody(String.class);
+                String payload = exchange.getMessage().getBody(String.class);
 
-            // Cifrar el contenido
-            //String encryptedData = cryptoService.encrypt(payload, institution);
-            //String[] split = encryptedData.split("::");
+                // Cifrar el contenido
+                String encryptedData = cryptoService.encrypt(payload, institution);
+                JWEObject jweObject = JWEObject.parse(encryptedData);
+                String jweCompact = jweObject.serialize();
+                String xKey = (String) jweObject.getHeader().getCustomParam("x-key"); // Asume que CryptoService lo incluye
 
+                if (xKey == null) {
+                    throw new IllegalStateException("x-key no generado durante la encriptación");
+                }
 
-            //exchange.getIn().setHeader("x-key", split[1]);
+                exchange.getIn().setHeader("x-key", xKey);
+                logger.info("📤 Datos cifrados (JWE): {}", jweCompact);
 
-            //logger.info("📤 Datos cifrados: {}", split[0]);
-
-            //exchange.setProperty("jweResponse", split[0]);
-            //exchange.getMessage().setBody(split[0]);
-
-            // Cifrar el contenido
-            String encryptedData = cryptoService.encrypt(payload, institution);
-            JWEObject jweObject = JWEObject.parse(encryptedData);
-            String jweCompact = jweObject.serialize();
-            String xKey = (String) jweObject.getHeader().getCustomParam("x-key"); // Asume que CryptoService lo incluye
-
-            if (xKey == null) {
-                throw new IllegalStateException("x-key no generado durante la encriptación");
+                exchange.setProperty("jweResponse", jweCompact);
+                exchange.getMessage().setBody(jweCompact);
+            } else {
+                logger.debug("JWE no habilitado para institución {}", institution.getId());
             }
-
-            exchange.getIn().setHeader("x-key", xKey);
-            logger.info("📤 Datos cifrados (JWE): {}", jweCompact);
-
-            exchange.setProperty("jweResponse", jweCompact);
-            exchange.getMessage().setBody(jweCompact);
-        } else {
-            logger.debug("JWE no habilitado para institución {}", institution.getId());
+        } catch (Exception e) {
+            exchange.setException(e);
         }
     }
 

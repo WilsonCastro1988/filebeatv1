@@ -24,27 +24,27 @@ public class MtlsProcessor implements Processor {
     }
 
     @Override
-    public void process(Exchange exchange) throws Exception {
+    public void process(Exchange exchange) {
         Institution institution = exchange.getProperty("institution", Institution.class);
 
         if (institution.getMtls() != null && institution.getMtls().isEnable()) {
-            logger.info("🔐 Verificando conexión MTLS para institución {}", institution.getId());
+            logger.info("🔐 Configurando WebClient MTLS para institución {}", institution.getId());
 
-            // Crear WebClient con MTLS y realizar una verificación básica (e.g., HEAD o ping)
             WebClient webClient = webClientService.createWebClient(institution);
-            Mono<String> healthCheck = webClient.get()
-                    .uri(institution.getEndpoint()) // + "/health" Endpoint de verificación, ajusta según el cliente
+
+            // Guardar WebClient para su uso posterior
+            exchange.setProperty("webClient", webClient);
+
+            logger.info("✅ WebClient MTLS listo para institución {}", institution.getId());
+
+            // Opcional: si quieres verificar, podrías hacer health check async sin bloquear:
+            webClient.get()
+                    .uri(institution.getEndpoint()) // Ajusta a /health si lo deseas
                     .retrieve()
                     .bodyToMono(String.class)
                     .timeout(Duration.ofMillis(institution.getTimeout()))
-                    .onErrorResume(e -> {
-                        logger.error("❌ Fallo en la verificación MTLS: {}", e.getMessage(), e);
-                        return Mono.error(new RuntimeException("Fallo en la verificación MTLS", e));
-                    });
-
-            String response = healthCheck.block(); // Bloquea para simular verificación
-            logger.info("✅ Conexión MTLS verificada para institución {}", institution.getId());
-            exchange.setProperty("webClient", webClient); // Guardar WebClient para uso posterior
+                    .doOnError(e -> logger.warn("⚠️ Health check MTLS fallido para {}: {}", institution.getId(), e.getMessage()))
+                    .subscribe(); // No bloquea, solo registra errores
         } else {
             logger.warn("⚠️ MTLS no habilitado para institución {}", institution.getId());
         }
