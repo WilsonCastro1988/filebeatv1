@@ -1,0 +1,204 @@
+# ===========================
+# 🧩 CONFIGMAP (DESARROLLO)
+# ===========================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ms-middleware-signcrypt-config
+  namespace: default
+data:
+  SERVER_PORT: "8442"
+  REDIS_PORT: "6379"
+  REDIS_HOSTNAME: "redis-service"
+  RUTA_CONFIG_XML: "/etc/tls/config-service.xml"
+  RUTA_CRL: "/etc/tls/certs/ca/crl/crl.der"
+  RUTA_RSA: "/etc/tls/rsa-keys"
+  EXPIRY_SECONDS: "300"
+  SPRING_JACKSON_DEFAULT_PROPERTY_INCLUSION: "non-null"
+  SPRING_JACKSON_TIME_ZONE: "GMT-5"
+  LOGGING_FILE_NAME: "/logs/app.log"
+  LOGGING_LEVEL_ROOT: "INFO"
+  CAMEL_COMPONENT_ELASTICSEARCH_HOSTADDRESSES: "elasticsearch-service:9200"
+---
+# ===========================
+# 🗝️ SECRET (DESARROLLO)
+# ===========================
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ms-middleware-signcrypt-secrets
+  namespace: default
+type: Opaque
+data:
+  REDIS_PASSWORD: "" # sin contraseña en entorno local
+---
+# ===========================
+# 💾 PVC PARA LOGS
+# ===========================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ms-middleware-signcrypt-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi
+  storageClassName: standard
+---
+# ===========================
+# 🚀 DEPLOYMENT PRINCIPAL
+# ===========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-middleware-signcrypt
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-middleware-signcrypt
+  template:
+    metadata:
+      labels:
+        app: ms-middleware-signcrypt
+    spec:
+      containers:
+        - name: ms-middleware-signcrypt
+          image: ms-middleware-signcrypt:dev
+          ports:
+            - containerPort: 8442
+          envFrom:
+            - configMapRef:
+                name: ms-middleware-signcrypt-config
+            - secretRef:
+                name: ms-middleware-signcrypt-secrets
+          volumeMounts:
+            - name: logs
+              mountPath: /logs
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8442
+            initialDelaySeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8442
+            initialDelaySeconds: 20
+      volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: ms-middleware-signcrypt-pvc
+---
+# ===========================
+# 🌐 SERVICE (NodePort)
+# ===========================
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-middleware-signcrypt-service
+  namespace: default
+spec:
+  selector:
+    app: ms-middleware-signcrypt
+  ports:
+    - protocol: TCP
+      port: 8442
+      targetPort: 8442
+      nodePort: 30042
+  type: NodePort
+---
+# ===========================
+# 🧠 REDIS (DEV)
+# ===========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7.0
+          ports:
+            - containerPort: 6379
+          command: ["redis-server"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: default
+spec:
+  selector:
+    app: redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+  type: ClusterIP
+---
+# ===========================
+# 🔍 ELASTICSEARCH (DEV)
+# ===========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+        - name: elasticsearch
+          image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
+          ports:
+            - containerPort: 9200
+          env:
+            - name: discovery.type
+              value: single-node
+            - name: xpack.security.enabled
+              value: "false"
+            - name: ES_JAVA_OPTS
+              value: "-Xms256m -Xmx256m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-service
+  namespace: default
+spec:
+  selector:
+    app: elasticsearch
+  ports:
+    - protocol: TCP
+      port: 9200
+      targetPort: 9200
+  type: ClusterIP

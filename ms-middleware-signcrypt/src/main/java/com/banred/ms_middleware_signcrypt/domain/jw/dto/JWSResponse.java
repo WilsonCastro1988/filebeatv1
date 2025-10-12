@@ -11,6 +11,7 @@ public class JWSResponse {
     private String signatureInput;
     private String signatureHeader;
 
+    /*
     public String getJwsCompact() {
         return jwsCompact;
     }
@@ -42,4 +43,6 @@ public class JWSResponse {
     public void setSignatureHeader(String signatureHeader) {
         this.signatureHeader = signatureHeader;
     }
+
+     */
 }

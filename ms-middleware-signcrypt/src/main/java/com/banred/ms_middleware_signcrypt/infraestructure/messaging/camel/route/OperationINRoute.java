@@ -1,5 +1,6 @@
 package com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.route;
 
+import com.banred.ms_middleware_signcrypt.common.exception.AbstractException;
 import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.JweDecryptProcessor;
 import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.JwsVerifySignProcessor;
 import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.MtlsProcessor;

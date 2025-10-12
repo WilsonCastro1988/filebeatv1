@@ -1,0 +1,46 @@
+# ==========================================
+# 🔹 Etapa 1: Construcción (usando Maven)
+# ==========================================
+FROM maven:3.9.6-eclipse-temurin-17 AS builder
+
+WORKDIR /app
+
+# Copiar archivos de configuración y dependencias
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# Copiar código fuente
+COPY src ./src
+
+# Compilar y empaquetar
+RUN mvn clean package -DskipTests
+
+# ==========================================
+# 🔹 Etapa 2: Imagen final (ejecución)
+# ==========================================
+FROM eclipse-temurin:17-jre
+
+LABEL maintainer="Daniel Arcos <darcos@banred.fin.ec>"
+LABEL description="Microservicio ms-middleware-signcrypt"
+
+WORKDIR /app
+
+# Crear carpetas necesarias
+RUN mkdir -p /logs /etc/tls/config /etc/tls/certs/ca/crl /etc/tls/rsa-keys
+
+# Copiar el .jar desde la etapa de construcción
+COPY --from=builder /app/target/*.jar /app/ms-middleware-signcrypt.jar
+
+# Exponer el puerto configurado
+EXPOSE 8442
+
+# Variables de entorno por defecto
+ENV SERVER_PORT=8442 \
+    REDIS_HOSTNAME=redis \
+    REDIS_PORT=6379 \
+    ELASTICSEARCH_HOST=elasticsearch:9200 \
+    SPRING_PROFILES_ACTIVE=prod \
+    JAVA_OPTS="-Xms512m -Xmx1024m"
+
+# Comando de inicio (permite override)
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/ms-middleware-signcrypt.jar"]

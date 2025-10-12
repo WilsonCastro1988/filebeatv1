@@ -5,6 +5,7 @@ import com.banred.ms_middleware_signcrypt.domain.institution.service.IInstitutio
 import com.banred.ms_middleware_signcrypt.domain.jw.dto.JWSResponse;
 import com.banred.ms_middleware_signcrypt.domain.jw.service.CryptoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JWEObject;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.slf4j.Logger;
@@ -54,6 +55,9 @@ public class RawApiProcessor implements Processor {
 
         // 4️⃣ Encriptar payload firmado
         String encryptedPayload = cryptoService.encrypt(jwsResponse.getJwsCompact(), institution);
+        JWEObject jweObject = JWEObject.parse(encryptedPayload);
+        String xKey = (String) jweObject.getHeader().getCustomParam("x-key"); // Asume que CryptoService lo incluye
+
 
         // 5️⃣ Preparar headers HTTP
         WebClient webClient = exchange.getProperty("webClient", WebClient.class);
@@ -67,7 +71,8 @@ public class RawApiProcessor implements Processor {
                 .header("X-Entity-ID", institution.getId())
                 .header("Signature", jwsResponse.getSignatureHeader())
                 .header("Signature-Input", jwsResponse.getSignatureInput())
-                .header("Digest", jwsResponse.getDigestHeader());
+                .header("Digest", jwsResponse.getDigestHeader())
+                .header("X-Key", xKey);
 
         headers.forEach((k, v) -> {
             if (!k.equalsIgnoreCase("xEntityID")) {

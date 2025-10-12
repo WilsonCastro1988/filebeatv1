@@ -1,6 +1,7 @@
 package com.banred.ms_middleware_signcrypt.domain.mtls.service.impl;
 
 import com.banred.ms_middleware_signcrypt.components.X509CertificateValidator;
+import com.banred.ms_middleware_signcrypt.components.X509CertificateValidatorV2;
 import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Institution;
 import com.banred.ms_middleware_signcrypt.domain.institution.service.IInstitutionRedisService;
 import com.banred.ms_middleware_signcrypt.domain.institution.service.IInstitutionService;
@@ -35,7 +36,7 @@ public class RestTemplateServiceImpl implements RestTemplateService {
     private IInstitutionRedisService institutionRedisService;
 
     @Autowired
-    private X509CertificateValidator certificateValidator;
+    private X509CertificateValidatorV2 certificateValidator;
 
 
     @Override
@@ -66,8 +67,6 @@ public class RestTemplateServiceImpl implements RestTemplateService {
                 keyStore.load(fis, keystorePassword);
             }
 
-            // Validar keystore
-            certificateValidator.validateKeyStoreCertificates(keyStore, institution);
 
             KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             kmf.init(keyStore, keystorePassword);
@@ -78,6 +77,10 @@ public class RestTemplateServiceImpl implements RestTemplateService {
             try (FileInputStream fis = new FileInputStream(institution.getMtls().getTruststore())) {
                 trustStore.load(fis, truststorePassword);
             }
+
+            // Validar keystore
+            certificateValidator.validateKeyStoreCertificates(keyStore, trustStore,institution);
+
 
             // Validar truststore
             certificateValidator.validateTrustStoreCertificates(trustStore, institution);

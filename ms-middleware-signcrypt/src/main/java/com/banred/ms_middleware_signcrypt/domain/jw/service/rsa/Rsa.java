@@ -121,7 +121,7 @@ public class Rsa implements IRsa {
             return readKeyAsBase64(publicKey);
         } catch (Exception e) {
             System.out.println("Error while encrypting: " + e);
-            return null;
+            throw new AbstractError("400","Error while encrypting: " + e.getMessage(),"N");
         }
     }
 
@@ -136,9 +136,9 @@ public class Rsa implements IRsa {
         KeyFactory keyFactory = KeyFactory.getInstance(TipoArgorithm.RSA.getValue());
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
         return readKeyAsBase64(keyFactory.generatePrivate(keySpec));
-        } catch (Exception e) {
+        } catch (AbstractError e) {
             System.out.println("Error while encrypting: " + e);
-            return null;
+            throw new AbstractError("400","Error while encrypting: " + e.getMessage(),"N");
         }
     }
 

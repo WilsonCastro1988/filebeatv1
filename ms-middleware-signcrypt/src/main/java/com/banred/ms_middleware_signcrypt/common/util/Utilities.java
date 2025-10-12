@@ -1,7 +1,6 @@
 package com.banred.ms_middleware_signcrypt.common.util;
 
 import com.banred.ms_middleware_signcrypt.domain.apim.dto.APIMRequestDTO;
-import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.InstitutionLookupProcessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

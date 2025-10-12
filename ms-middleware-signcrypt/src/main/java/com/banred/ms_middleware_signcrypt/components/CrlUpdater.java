@@ -34,7 +34,7 @@ public class CrlUpdater {
             // Agregar más URLs de CAs aquí
     );
 
-    private final Path crlDir = Path.of("D:\\OneDrive - BANRED S.A\\Documentos\\Microservicios\\filebeatv1\\ms-middleware-signcrypt\\src\\main\\resources\\certs\\ca\\crl"); // carpeta local donde guardas las CRL
+    private final Path crlDir = Path.of("${microservice.parameters.RUTA_CRL}"); // carpeta local donde guardas las CRL
 
     private byte[] lastCRLHash = null;
 

@@ -1,10 +1,15 @@
 package com.banred.ms_middleware_signcrypt.domain.mtls.service.impl;
 
+import com.banred.ms_middleware_signcrypt.common.exception.AbstractError;
 import com.banred.ms_middleware_signcrypt.components.X509CertificateValidator;
+import com.banred.ms_middleware_signcrypt.components.X509CertificateValidatorV2;
 import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Institution;
 import com.banred.ms_middleware_signcrypt.domain.mtls.service.WebClientService;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.SslHandshakeCompletionEvent;
 import io.netty.handler.ssl.SslProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +19,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
 import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.security.KeyStore;
 import java.time.Duration;
 
@@ -24,9 +31,9 @@ public class WebClientServiceImpl implements WebClientService {
 
     private static final Logger logger = LoggerFactory.getLogger(WebClientServiceImpl.class);
 
-    private final X509CertificateValidator certificateValidator;
+    private final X509CertificateValidatorV2 certificateValidator;
 
-    public WebClientServiceImpl(X509CertificateValidator certificateValidator) {
+    public WebClientServiceImpl(X509CertificateValidatorV2 certificateValidator) {
         this.certificateValidator = certificateValidator;
     }
 
@@ -40,7 +47,6 @@ public class WebClientServiceImpl implements WebClientService {
             }
             KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             kmf.init(keyStore, institution.getMtls().getKeystorePassword().toCharArray());
-            certificateValidator.validateKeyStoreCertificates(keyStore, institution);
 
             KeyStore trustStore = KeyStore.getInstance("PKCS12");
             try (FileInputStream fis = new FileInputStream(institution.getMtls().getTruststore())) {
@@ -48,6 +54,10 @@ public class WebClientServiceImpl implements WebClientService {
             }
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(trustStore);
+
+
+            certificateValidator.validateKeyStoreCertificates(keyStore, trustStore, institution);
+
             certificateValidator.validateTrustStoreCertificates(trustStore, institution);
 
             // 2. Crear SslContext de Netty
@@ -58,9 +68,28 @@ public class WebClientServiceImpl implements WebClientService {
                     .build();
 
             // 3. Crear HttpClient con SSL
-            HttpClient httpClient = HttpClient.create()
+            /*HttpClient httpClient = HttpClient.create()
                     .secure(sslSpec -> sslSpec.sslContext(sslCtx))
                     .responseTimeout(Duration.ofMillis(institution.getTimeout()));
+
+             */
+
+            HttpClient httpClient = HttpClient.create()
+                    .secure(sslSpec -> sslSpec.sslContext(sslCtx))
+                    .doOnConnected(conn -> conn.addHandlerLast(new ChannelInboundHandlerAdapter() {
+                        @Override
+                        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+                            if (evt instanceof SslHandshakeCompletionEvent) {
+                                SslHandshakeCompletionEvent handshakeEvent = (SslHandshakeCompletionEvent) evt;
+                                if (!handshakeEvent.isSuccess()) {
+                                    throw new AbstractError("401", handshakeEvent.cause().getMessage(), "N");
+                                }
+                            }
+                            super.userEventTriggered(ctx, evt);
+                        }
+                    }))
+                    .responseTimeout(Duration.ofMillis(institution.getTimeout()));
+
 
             // 4. Crear WebClient
             WebClient webClient = WebClient.builder()
@@ -71,7 +100,10 @@ public class WebClientServiceImpl implements WebClientService {
             logger.info("WebClient con MTLS creado para institución {}", institution.getId());
             return webClient;
 
-        } catch (Exception e) {
+        } catch (FileNotFoundException e) {
+            throw new AbstractError("401", "RECHAZADA", "N");
+        }
+        catch (Exception e) {
             logger.error("Error creando WebClient para institución {}", institution.getId(), e);
             throw new RuntimeException("Error inicializando WebClient con MTLS", e);
         }

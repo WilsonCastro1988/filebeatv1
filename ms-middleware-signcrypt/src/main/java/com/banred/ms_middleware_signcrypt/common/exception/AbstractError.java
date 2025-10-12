@@ -15,14 +15,14 @@ public class AbstractError extends AbstractException {
 
     public AbstractError(String codigo, String mensaje, String origen) {
         super(mensaje);
-        this.errorAes256 = new BodyErrorAes256("N", codigo, mensaje, "", origen);
-        this.httpStatusCode = 400;
+        this.errorAes256 = new BodyErrorAes256(TIPO_NEGOCIO, codigo, mensaje, "", origen);
+        this.httpStatusCode = HTTP_STATUS_CODE_BAD_REQUEST;
     }
 
     public AbstractError(Exception ex, String origen) {
         super(ex);
-        this.errorAes256 = new BodyErrorAes256("T", "9999", ex.getMessage(), ex.toString(), origen);
-        this.httpStatusCode = 500;
+        this.errorAes256 = new BodyErrorAes256(TIPO_TECNICO, CODIGO_ERROR, ex.getMessage(), ex.toString(), origen);
+        this.httpStatusCode = HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR;
     }
 
     public int getCodigoHttp() {

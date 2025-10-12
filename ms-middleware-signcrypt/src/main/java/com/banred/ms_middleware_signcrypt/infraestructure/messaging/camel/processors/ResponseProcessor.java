@@ -1,6 +1,7 @@
 package com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors;
 
 import com.banred.ms_middleware_signcrypt.common.constant.StatusResponse;
+import com.banred.ms_middleware_signcrypt.domain.apim.dto.APIMRequestDTO;
 import com.banred.ms_middleware_signcrypt.domain.apim.dto.APIMResponseDTO;
 import com.banred.ms_middleware_signcrypt.domain.apim.dto.SignatureDTO;
 import com.nimbusds.jose.shaded.gson.Gson;
@@ -14,6 +15,7 @@ import java.text.ParseException;
 import java.util.Date;
 
 import static com.banred.ms_middleware_signcrypt.common.util.Utilities.getDateStringISO8601;
+import static com.banred.ms_middleware_signcrypt.common.util.Utilities.jsonToDtoConverter;
 
 @Component
 public class ResponseProcessor implements Processor {

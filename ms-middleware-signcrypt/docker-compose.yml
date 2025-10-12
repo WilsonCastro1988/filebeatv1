@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  ms-middleware-signcrypt:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ms-middleware-signcrypt
+    ports:
+      - "8442:8442"
+    environment:
+      - SERVER_PORT=8442
+      - REDIS_HOSTNAME=redis
+      - REDIS_PORT=6379
+      - RUTA_CONFIG_XML=/etc/tls/config-service.xml
+      - RUTA_CRL=/etc/tls/certs/ca/crl/crl.der
+      - RUTA_RSA=/etc/tls/rsa-keys
+      - EXPIRY_SECONDS=300
+      - SPRING_JACKSON_DEFAULT_PROPERTY_INCLUSION=non-null
+      - SPRING_JACKSON_TIME_ZONE=GMT-5
+      - LOGGING_FILE_NAME=/logs/app.log
+      - LOGGING_LOGBACK_ROLLINGPOLICY_FILE_NAME_PATTERN=/logs/app.%d{yyyy-MM-dd}.log
+      - LOGGING_LOGBACK_ROLLINGPOLICY_MAX_HISTORY=7
+      - LOGGING_LOGBACK_ROLLINGPOLICY_TOTAL_SIZE_CAP=1GB
+      - LOGGING_LEVEL_ROOT=DEBUG
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB=DEBUG
+      - LOGGING_LEVEL_COM_BANRED=DEBUG
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY=DEBUG
+      - CAMEL_COMPONENT_ELASTICSEARCH_HOSTADDRESSES=elasticsearch:9200
+      - JAVA_TOOL_OPTIONS=-Djavax.net.debug=ssl:handshake:verbose -Dreactor.netty.log.level=DEBUG
+    volumes:
+      - ./logs:/logs
+      - ./src/main/resources/tls/config-service.xml:/etc/tls/config-service.xml
+      - ./src/main/resources/tls/certs/ca/crl/crl.der:/etc/tls/certs/ca/crl/crl.der
+      - ./src/main/resources/tls/rsa-keys:/etc/tls/rsa-keys
+    depends_on:
+      - redis
+      - elasticsearch
+    networks:
+      - signcrypt-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.0
+    container_name: redis
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD:-}
+    volumes:
+      - redis-data:/data
+    networks:
+      - signcrypt-network
+    restart: unless-stopped
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
+    container_name: elasticsearch
+    environment:
+      - cluster.name=docker-cluster
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    networks:
+      - signcrypt-network
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+  es-data:
+
+networks:
+  signcrypt-network:
+    driver: bridge

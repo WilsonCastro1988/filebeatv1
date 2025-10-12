@@ -2,8 +2,8 @@ info:
   version: 1.0.0
   date: 2025-09-05
   stage: development
-  autor: Daniel Arcos
-  email: darcos@banred.fin.ec
+  autor: Daniel Arcos, Wilson Castro
+  email: darcos@banred.fin.ec, wcastro@banred.fin.ec
   description: ms-middleware-signcrypt
 
 server:
@@ -79,6 +79,6 @@ microservice:
     REDIS_PASSWORD: ${REDIS_PASSWORD:}
     REDIS_HOSTNAME: ${REDIS_HOSTNAME:localhost}
     RUTA_CONFIG_XML: ${RUTA_CONFIG_XML:C:/etc/tls/config-service.xml}
-    RUTA_CRL: ${RUTA_CRL:certs/ca/crl/crl.der}
+    RUTA_CRL: ${RUTA_CRL:C:/etc/tls/certs/ca/crl/crl.der}
     RUTA_RSA: ${RUTA_CRL:C:/etc/tls/rsa-keys}
     EXPIRY_SECONDS: ${EXPIRY_SECONDS:300}

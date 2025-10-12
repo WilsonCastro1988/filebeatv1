@@ -5,9 +5,9 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.Security;
@@ -95,7 +95,7 @@ public class X509CertificateValidator {
         Security.addProvider(new BouncyCastleProvider());
         CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
         //CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        try (InputStream in = new ClassPathResource(rutaCRL).getInputStream()) {
+        try (InputStream in = new FileInputStream(rutaCRL)) {
             X509CRL crl = (X509CRL) cf.generateCRL(in);
 
             logger.info("CRL cargada: issuer {}, próxima actualización {}",

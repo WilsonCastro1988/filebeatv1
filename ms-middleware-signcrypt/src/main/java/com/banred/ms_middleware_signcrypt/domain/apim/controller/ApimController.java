@@ -1,6 +1,6 @@
 package com.banred.ms_middleware_signcrypt.domain.apim.controller;
 
-import com.banred.ms_middleware_signcrypt.domain.apim.dto.APIMRequestDTO;
+import com.banred.ms_middleware_signcrypt.common.exception.AbstractException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.apache.camel.ProducerTemplate;
@@ -48,8 +48,8 @@ public class ApimController {
                 headerMap.put(entry.getKey(), entry.getValue().get(0)); // Tomar el primer valor si hay múltiples
             }
             return producerTemplate.requestBodyAndHeaders("direct:operation", payload, headerMap, String.class);
-        } catch (Exception e) {
-            return "Error: " + e.getMessage();
+        } catch (AbstractException e) {
+            throw e;
         }
     }
 

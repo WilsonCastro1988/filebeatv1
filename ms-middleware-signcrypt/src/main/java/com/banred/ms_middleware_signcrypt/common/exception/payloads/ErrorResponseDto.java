@@ -2,7 +2,6 @@ package com.banred.ms_middleware_signcrypt.common.exception.payloads;
 
 import lombok.Data;
 
-import java.util.List;
 import java.util.Map;
 
 @Data
@@ -12,7 +11,8 @@ public class ErrorResponseDto {
     private String error;  // Ejemplo: INVALID REQUEST
     private Map<String, String> error_description;
 
-    public ErrorResponseDto() {}
+    public ErrorResponseDto() {
+    }
 
     public ErrorResponseDto(String status, String error, Map<String, String> error_description) {
         this.status = status;

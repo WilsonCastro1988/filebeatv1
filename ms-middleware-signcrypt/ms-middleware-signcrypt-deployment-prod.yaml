@@ -1,0 +1,248 @@
+# ===========================
+# 🧩 CONFIGMAP (PROD)
+# ===========================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ms-middleware-signcrypt-config
+  namespace: prod
+data:
+  SERVER_PORT: "8442"
+  REDIS_PORT: "6379"
+  REDIS_HOSTNAME: "redis-service"
+  RUTA_CONFIG_XML: "/etc/tls/config-service.xml"
+  RUTA_CRL: "/etc/tls/certs/ca/crl/crl.der"
+  RUTA_RSA: "/etc/tls/rsa-keys"
+  EXPIRY_SECONDS: "300"
+  SPRING_JACKSON_TIME_ZONE: "GMT-5"
+  LOGGING_FILE_NAME: "/logs/app.log"
+  CAMEL_COMPONENT_ELASTICSEARCH_HOSTADDRESSES: "elasticsearch-service:9200"
+---
+# ===========================
+# 🗝️ SECRET (PROD)
+# ===========================
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ms-middleware-signcrypt-secrets
+  namespace: prod
+type: Opaque
+data:
+  REDIS_PASSWORD: "MTIzNDU=" # "12345"
+  TLS_KEYSTORE_PASSWORD: "cGFzc3dvcmQ=" # "password"
+---
+# ===========================
+# 💾 PVCs (PROD)
+# ===========================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: logs-pvc
+  namespace: prod
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rsa-keys-pvc
+  namespace: prod
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 500Mi
+---
+# ===========================
+# 🚀 DEPLOYMENT PRINCIPAL
+# ===========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-middleware-signcrypt
+  namespace: prod
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ms-middleware-signcrypt
+  template:
+    metadata:
+      labels:
+        app: ms-middleware-signcrypt
+    spec:
+      containers:
+        - name: ms-middleware-signcrypt
+          image: your-registry/ms-middleware-signcrypt:1.0.0
+          ports:
+            - containerPort: 8442
+          envFrom:
+            - configMapRef:
+                name: ms-middleware-signcrypt-config
+            - secretRef:
+                name: ms-middleware-signcrypt-secrets
+          volumeMounts:
+            - name: logs
+              mountPath: /logs
+            - name: rsa-keys
+              mountPath: /etc/tls/rsa-keys
+            - name: keystore
+              mountPath: /etc/tls/keystore
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1
+              memory: 1Gi
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8442
+            initialDelaySeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8442
+            initialDelaySeconds: 20
+      volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: logs-pvc
+        - name: rsa-keys
+          persistentVolumeClaim:
+            claimName: rsa-keys-pvc
+        - name: keystore
+          secret:
+            secretName: ms-middleware-signcrypt-secrets
+            items:
+              - key: keystore.jks
+                path: keystore.jks
+---
+# ===========================
+# 🌐 SERVICE (PROD)
+# ===========================
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-middleware-signcrypt-service
+  namespace: prod
+spec:
+  selector:
+    app: ms-middleware-signcrypt
+  ports:
+    - protocol: TCP
+      port: 8442
+      targetPort: 8442
+  type: ClusterIP
+---
+# ===========================
+# 🔐 REDIS (PROD)
+# ===========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7.0
+          ports:
+            - containerPort: 6379
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ms-middleware-signcrypt-secrets
+                  key: REDIS_PASSWORD
+          command: ["redis-server"]
+          args: ["--requirepass", "$(REDIS_PASSWORD)"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: prod
+spec:
+  selector:
+    app: redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+  type: ClusterIP
+---
+# ===========================
+# 🔍 ELASTICSEARCH (PROD)
+# ===========================
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elasticsearch
+  namespace: prod
+spec:
+  serviceName: elasticsearch
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+        - name: elasticsearch
+          image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
+          ports:
+            - containerPort: 9200
+          env:
+            - name: cluster.name
+              value: prod-cluster
+            - name: discovery.type
+              value: single-node
+            - name: xpack.security.enabled
+              value: "true"
+            - name: ELASTIC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ms-middleware-signcrypt-secrets
+                  key: ELASTIC_PASSWORD
+            - name: ES_JAVA_OPTS
+              value: "-Xms512m -Xmx512m"
+          volumeMounts:
+            - name: data
+              mountPath: /usr/share/elasticsearch/data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-service
+  namespace: prod
+spec:
+  selector:
+    app: elasticsearch
+  ports:
+    - port: 9200
+      targetPort: 9200
+  type: ClusterIP

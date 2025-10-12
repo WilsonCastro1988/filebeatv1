@@ -1,5 +1,6 @@
-package com.banred.ms_middleware_signcrypt.controller;
+package com.banred.ms_middleware_signcrypt.common.exception.handler;
 
+import com.banred.ms_middleware_signcrypt.common.exception.AbstractException;
 import com.banred.ms_middleware_signcrypt.common.exception.payloads.ErrorResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,5 +29,16 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+
+
+    @ExceptionHandler(AbstractException.class)
+    public ResponseEntity<Map<String, Object>> handleAbstractException(AbstractException ex) {
+        Map<String, Object> errorBody = new HashMap<>();
+        errorBody.put("status", ex.getCodigoHttp());
+        errorBody.put("error", ex.getMessage());
+        errorBody.put("error_description", ex.getTipo());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorBody);
+    }
+
 }
 
