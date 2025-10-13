@@ -14,7 +14,7 @@
 
     <groupId>com.banred</groupId>
     <artifactId>ms-middleware-signcrypt</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>ms-middleware-signcrypt</name>
     <description>Middleware de Seguridad Pago Directo (JWS, JWE, mTLS)</description>
 

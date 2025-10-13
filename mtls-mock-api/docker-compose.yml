@@ -1,15 +1,44 @@
-version: "3.9"
 services:
-  redis:
-    image: redis:7
-    container_name: redis
-    ports:
-      - "6379:6379"
-
-  mtls-mock-server:
-    build: .
-    container_name: mtls-mock-server
+  ms-mtls-server-mock:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ms-mtls-server-mock
     ports:
       - "8443:8443"
-    depends_on:
-      - redis
+    environment:
+      - SERVER_PORT=8443
+      - SERVER_ADDRESS=0.0.0.0
+      - LOGGING_LEVEL_ROOT=INFO
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY=INFO
+      - SERVER_SSL_KEY_STORE=/etc/tls/certs/server/server-keystore.p12
+      - SERVER_SSL_KEY_STORE_PASSWORD=serverpass
+      - SERVER_SSL_KEY_STORE_TYPE=PKCS12
+      - SERVER_SSL_KEY_ALIAS=server
+      - SERVER_SSL_TRUST_STORE=/etc/tls/certs/server/server-truststore.p12
+      - SERVER_SSL_TRUST_STORE_PASSWORD=serverpass
+      - SERVER_SSL_TRUST_STORE_TYPE=PKCS12
+      - SERVER_SSL_CLIENT_AUTH=need
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_DATA_REDIS_PASSWORD=Passw0rd
+      - SPRING_DATA_REDIS_TIMEOUT=60000
+      - LOGGING_FILE_NAME=/logs/mockserver.log
+      - LOGGING_LOGBACK_ROLLINGPOLICY_FILE_NAME_PATTERN=/logs/mockserver.%d{yyyy-MM-dd}.log
+      - LOGGING_LOGBACK_ROLLINGPOLICY_MAX_HISTORY=7
+      - LOGGING_LOGBACK_ROLLINGPOLICY_TOTAL_SIZE_CAP=1GB
+      - JAVA_OPTS=-Xms256m -Xmx512m -Djava.security.egd=file:/dev/./urandom
+    volumes:
+      - /C/etc/logs:/logs
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+    networks:
+      - signcrypt-network
+    restart: unless-stopped
+
+networks:
+  signcrypt-network:
+    driver: bridge
