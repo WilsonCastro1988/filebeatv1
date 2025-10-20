@@ -1,5 +1,8 @@
 package com.banred.ms_middleware_signcrypt.common.constant;
 
+import lombok.Getter;
+
+@Getter
 public enum TipoArgorithm {
     AES("AES"),
     RSA("RSA");
@@ -8,10 +11,6 @@ public enum TipoArgorithm {
 
     TipoArgorithm(String value) {
         this.value = value;
-    }
-
-    public String getValue() {
-        return value;
     }
 
     public static TipoArgorithm fromValue(String value) {

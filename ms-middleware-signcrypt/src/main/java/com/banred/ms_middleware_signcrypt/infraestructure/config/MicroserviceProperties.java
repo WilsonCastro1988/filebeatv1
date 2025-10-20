@@ -9,14 +9,14 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "microservice.parameters")
 public class MicroserviceProperties {
 
-    private int REDIS_PORT;
-    private String REDIS_USERNAME;
-    private String REDIS_PASSWORD;
-    private String REDIS_HOSTNAME;
-    private String RUTA_CONFIG_XML;
-    private String RUTA_CRL;
-    private String RUTA_RSA;
-    private long EXPIRY_SECONDS;
+    private int redisPort;
+    private String redisUsername;
+    private String redisPassword;
+    private String redisHostname;
+    private String rutaConfigXml;
+    private String rutaCrl;
+    private String rutaRsa;
+    private long expirySeconds;
 
 
 }

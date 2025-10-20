@@ -1,54 +1,48 @@
 package com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.route;
 
-import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Institution;
-import com.banred.ms_middleware_signcrypt.domain.institution.service.IInstitutionRedisService;
-import com.banred.ms_middleware_signcrypt.domain.jw.dto.JWSResponse;
-import com.banred.ms_middleware_signcrypt.domain.jw.service.CryptoService;
-import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.*;
+import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.MiddlerwareLookupProcessor;
+import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.MtlsProcessor;
+import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.RawApiInProcessor;
+import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.RawApiOutProcessor;
 import org.apache.camel.builder.RouteBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MiddlewareRoute extends RouteBuilder {
 
 
-    private final RawApiProcessor rawApiProcessor;
+    private final RawApiOutProcessor rawApiOutProcessor;
+    private final RawApiInProcessor rawApiInProcessor;
     private final MtlsProcessor mtlsRequestProcessor;
-    private final InstitutionLookupProcessor institutionLookupProcessor;
-    private final IInstitutionRedisService institutionRedisService;
+    private final MiddlerwareLookupProcessor middlerwareLookupProcessor;
 
 
-    public MiddlewareRoute(RawApiProcessor rawApiProcessor, MtlsProcessor mtlsRequestProcessor, InstitutionLookupProcessor institutionLookupProcessor, IInstitutionRedisService institutionRedisService) {
-        this.rawApiProcessor = rawApiProcessor;
+    public MiddlewareRoute(RawApiOutProcessor rawApiProcessor, RawApiInProcessor rawApiInProcessor, MtlsProcessor mtlsRequestProcessor, MiddlerwareLookupProcessor middlerwareLookupProcessor) {
+        this.rawApiOutProcessor = rawApiProcessor;
+        this.rawApiInProcessor = rawApiInProcessor;
         this.mtlsRequestProcessor = mtlsRequestProcessor;
-        this.institutionLookupProcessor = institutionLookupProcessor;
-        this.institutionRedisService = institutionRedisService;
+        this.middlerwareLookupProcessor = middlerwareLookupProcessor;
     }
 
 
     @Override
     public void configure() {
-        from("direct:raw-api")
-                .routeId("raw-api")
-                .log("🔐 Iniciando procesamiento raw-api para payload: ${body}")
-                .process(exchange -> {
-                    // Recuperar institución y setearla en Exchange
-                    String xEntityID = exchange.getIn().getHeader("xEntityID", String.class);
-                    if (xEntityID == null || xEntityID.isEmpty()) {
-                        throw new IllegalArgumentException("Header xEntityID no presente");
-                    }
-                    Institution institution = institutionRedisService.getInstitution(xEntityID);
-                    if (institution == null) {
-                        throw new IllegalStateException("No se encontró institución para RECEIVER: " + xEntityID);
-                    }
-                    exchange.setProperty("institution", institution);
-                })
+        from("direct:middleware")
+                .routeId("middleware")
+                .log("🔐 Iniciando procesamiento middleware para payload: ${body}")
+                .process(middlerwareLookupProcessor)
                 .choice()
-                .when(simple("${exchangeProperty.institution.mtls.enable} == true"))
+                .when(simple("${exchangeProperty.middleware} == 'out'"))
                 .process(mtlsRequestProcessor)
                 .end()
-                .process(rawApiProcessor) // Firma, encripta y envía dinámicamente
-                .log("✅ Respuesta devuelta por raw-api: ${body}");
+                .choice()
+                .when(simple("${exchangeProperty.middleware} == 'out'"))
+                .process(rawApiOutProcessor) // Firma, encripta y envía dinámicamente
+                .end()
+                .choice()
+                .when(simple("${exchangeProperty.middleware} == 'in'"))
+                .process(rawApiInProcessor) // Desencripta, valida firma
+                .end()
+                .log("✅ Respuesta devuelta por middleware: ${body}");
     }
 }

@@ -15,13 +15,5 @@ import java.util.List;
 @Setter
 public class Institutions {
     @XmlElement(name ="Institution")
-    private List<Institution> institutions;
-
-    public List<Institution> getInstitutions() {
-        return institutions;
-    }
-
-    public void setInstitutions(List<Institution> institutions) {
-        this.institutions = institutions;
-    }
+    private List<Institution> institutionList;
 }

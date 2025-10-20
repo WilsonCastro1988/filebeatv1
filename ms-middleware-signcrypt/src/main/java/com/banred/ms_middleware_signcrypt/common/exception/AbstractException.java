@@ -5,22 +5,22 @@ public abstract class AbstractException extends RuntimeException {
 
     private static final long serialVersionUID = -8132295132825609981L;
 
-    public AbstractException() {
+    AbstractException() {
     }
 
-    public AbstractException(String mensaje) {
+    AbstractException(String mensaje) {
         super(mensaje);
     }
 
-    public AbstractException(Exception ex) {
+    AbstractException(Exception ex) {
         super(ex);
     }
 
-    public AbstractException(String message, Throwable cause) {
+    AbstractException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public AbstractException(Throwable cause) {
+    AbstractException(Throwable cause) {
         super(cause);
     }
 

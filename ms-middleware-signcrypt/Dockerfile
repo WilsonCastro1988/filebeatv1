@@ -1,29 +1,47 @@
-# Usar una imagen base de OpenJDK 17 (compatible con Spring Boot)
-FROM openjdk:17-jdk-slim
+# Usar una imagen base JRE ligera para producción
+FROM amazoncorretto:17.0.16-alpine3.21
+LABEL maintener="wcastro@banred.fin.ec"
+LABEL Description="Microservicio GatewaySeguridad Pago Directo"
+
+# Actualiza el índice de paquetes e instala dependencias necesarias
+RUN apk update && \
+    apk upgrade --no-cache && \
+    apk add --no-cache openssl
+
+ENV TZ=America/Guayaquil
+
+ARG SERVER_PORT=8443
+ARG user=devopsa
+ARG group=devopsa
+ARG home=/home/$user
+ARG keyalias=ws-security-spring-boot
+ARG domain=banred.fin.ec
+ARG organization=BANRED
+ARG JAR_FILE=target/*.jar
+
+# RUN groupadd -g 1337 $user && useradd -d $home -u 1337 -s /bin/bash -g $group $user
+RUN addgroup -g 1337 $group && adduser -D -h $home -u 1337 -G $group $user
+
+RUN mkdir -p $home/app/logs/ && chown -R $user:$group $home/app/
+
+RUN mkdir -p /etc/ssl/certs/
+
+RUN keytool -genkey -alias $keyalias -keyalg RSA -keysize 4096 -sigalg SHA256withRSA -storetype PKCS12 -keystore /etc/ssl/certs/localhost.p12 -dname CN=$domain,OU=$organization,O=$organization,L=$city,C=CN -validity 3650 -storepass $SSL_TRUSTSTORE_PASSWORD -keypass $SSL_KEYSTORE_PASSWORD -ext san=dns:$domain
+
+RUN chown -R $user:$group /etc/ssl/certs/ && chmod -R 700 /etc/ssl/certs/
+
+RUN mkdir -p $home/app/certs/ && chown -R $user:$group $home/app/certs/ && chmod -R 700 $home/app/certs/
+
+USER $user
 
 # Establecer el directorio de trabajo
-WORKDIR /app
+WORKDIR $home/app/
 
-# Copiar el JAR de la aplicación (asumiendo que está en el directorio target)
-COPY target/ms-middleware-signcrypt-1.0.0.jar app.jar
+# Copiar el JAR ejecutable de la aplicación
+COPY ${JAR_FILE} app.jar
 
-# Exponer el puerto 8442 (HTTPS para mTLS)
-EXPOSE 8442
-
-# Configurar variables de entorno desde properties.yaml
-ENV SERVER_PORT=8442
-ENV REDIS_PORT=6379
-ENV REDIS_HOSTNAME=redis
-ENV RUTA_CONFIG_XML=/etc/tls/config-service.xml
-ENV RUTA_CRL=/etc/tls/certs/ca/crl/crl.der
-ENV RUTA_RSA=/etc/tls/rsa-keys
-ENV EXPIRY_SECONDS=300
-ENV SPRING_JACKSON_DEFAULT_PROPERTY_INCLUSION=non-null
-ENV SPRING_JACKSON_TIME_ZONE=GMT-5
-ENV LOGGING_FILE_NAME=/logs/app.log
-ENV LOGGING_LOGBACK_ROLLINGPOLICY_FILE_NAME_PATTERN=/logs/app.%d{yyyy-MM-dd}.log
-ENV LOGGING_LOGBACK_ROLLINGPOLICY_MAX_HISTORY=7
-ENV LOGGING_LOGBACK_ROLLINGPOLICY_TOTAL_SIZE_CAP=1GB
+# Exponer el puerto 8443 (HTTPS para mTLS)
+EXPOSE ${SERVER_PORT}
 
 # Comando para ejecutar la aplicación
-ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

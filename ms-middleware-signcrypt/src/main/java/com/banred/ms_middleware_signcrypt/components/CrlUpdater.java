@@ -58,14 +58,14 @@ public class CrlUpdater {
                             fos.write(crlBytes);
                         }
                         lastCRLHash = hash;
-                        System.out.println("CRL actualizada desde: " + urlStr);
+                        logger.info("CRL actualizada desde: {}", urlStr);
                     } else {
-                        System.out.println("CRL sin cambios, no se actualiza: " + urlStr);
+                        logger.info("CRL sin cambios, no se actualiza: {}", urlStr);
                     }
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.info("CRL sin cambios, no se actualiza: {}", e);
         }
     }
 }

@@ -25,44 +25,4 @@ public class SecurityConfig {
 
     @XmlElement(name="truststorePassword")
     private String truststorePassword;
-
-    public boolean isEnable() {
-        return enable;
-    }
-
-    public void setEnable(boolean enable) {
-        this.enable = enable;
-    }
-
-    public String getKeystore() {
-        return keystore;
-    }
-
-    public void setKeystore(String keystore) {
-        this.keystore = keystore;
-    }
-
-    public String getTruststore() {
-        return truststore;
-    }
-
-    public void setTruststore(String truststore) {
-        this.truststore = truststore;
-    }
-
-    public String getKeystorePassword() {
-        return keystorePassword;
-    }
-
-    public void setKeystorePassword(String keystorePassword) {
-        this.keystorePassword = keystorePassword;
-    }
-
-    public String getTruststorePassword() {
-        return truststorePassword;
-    }
-
-    public void setTruststorePassword(String truststorePassword) {
-        this.truststorePassword = truststorePassword;
-    }
 }

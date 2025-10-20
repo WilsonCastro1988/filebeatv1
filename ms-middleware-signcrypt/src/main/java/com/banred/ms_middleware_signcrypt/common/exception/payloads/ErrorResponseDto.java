@@ -9,15 +9,15 @@ public class ErrorResponseDto {
 
     private String status; // Ejemplo: FAILED
     private String error;  // Ejemplo: INVALID REQUEST
-    private Map<String, String> error_description;
+    private Map<String, String> errorDescription;
 
     public ErrorResponseDto() {
     }
 
-    public ErrorResponseDto(String status, String error, Map<String, String> error_description) {
+    public ErrorResponseDto(String status, String error, Map<String, String> errorDescription) {
         this.status = status;
         this.error = error;
-        this.error_description = error_description;
+        this.errorDescription = errorDescription;
     }
 
     public String getStatus() {
@@ -36,11 +36,11 @@ public class ErrorResponseDto {
         this.error = error;
     }
 
-    public Map<String, String> getError_description() {
-        return error_description;
+    public Map<String, String> getErrorDescription() {
+        return errorDescription;
     }
 
-    public void setError_description(Map<String, String> error_description) {
-        this.error_description = error_description;
+    public void setErrorDescription(Map<String, String> errorDescription) {
+        this.errorDescription = errorDescription;
     }
 }

@@ -1,5 +1,8 @@
 package com.banred.ms_middleware_signcrypt.common.constant;
 
+import lombok.Getter;
+
+@Getter
 public enum TipoCanal {
     IN("IN"),
     MB("MB"),
@@ -9,10 +12,6 @@ public enum TipoCanal {
 
     TipoCanal(String value) {
         this.value = value;
-    }
-
-    public String getValue() {
-        return value;
     }
 
     public static TipoCanal fromValue(String value) {

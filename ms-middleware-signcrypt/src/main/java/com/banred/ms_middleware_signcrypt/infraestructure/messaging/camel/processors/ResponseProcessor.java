@@ -1,7 +1,7 @@
 package com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors;
 
 import com.banred.ms_middleware_signcrypt.common.constant.StatusResponse;
-import com.banred.ms_middleware_signcrypt.domain.apim.dto.APIMRequestDTO;
+import com.banred.ms_middleware_signcrypt.common.exception.AbstractException;
 import com.banred.ms_middleware_signcrypt.domain.apim.dto.APIMResponseDTO;
 import com.banred.ms_middleware_signcrypt.domain.apim.dto.SignatureDTO;
 import com.nimbusds.jose.shaded.gson.Gson;
@@ -15,7 +15,6 @@ import java.text.ParseException;
 import java.util.Date;
 
 import static com.banred.ms_middleware_signcrypt.common.util.Utilities.getDateStringISO8601;
-import static com.banred.ms_middleware_signcrypt.common.util.Utilities.jsonToDtoConverter;
 
 @Component
 public class ResponseProcessor implements Processor {
@@ -40,12 +39,12 @@ public class ResponseProcessor implements Processor {
             signatureDTO.setSignatureInput(signatureInput);
 
             APIMResponseDTO dto = new APIMResponseDTO();
-            dto.setxEntityID(xEntityID);
-            dto.setxKey(xKey);
+            dto.setXEntityID(xEntityID);
+            dto.setXKey(xKey);
             dto.setPayload(responseBody);
             dto.setStatus(StatusResponse.SUCCESS.getValue());
-            dto.setTimestamp_OUT(getDateStringISO8601(new Date()));
-            dto.setTimestamp_IN(timestampIn);
+            dto.setTimestampOut(getDateStringISO8601(new Date()));
+            dto.setTimestampIn(timestampIn);
             dto.setSign(signatureDTO);
 
             Gson gson = new Gson();
@@ -55,14 +54,13 @@ public class ResponseProcessor implements Processor {
             // 2. Actualizar el cuerpo del Exchange con el JSON preparado
             exchange.getMessage().setBody(requestBody);
 
-        } catch (Exception e) {
+        } catch (AbstractException e) {
             logger.error("Error al construir la respuesta: {}", e.getMessage(), e);
             APIMResponseDTO errorDto = new APIMResponseDTO();
             errorDto.setStatus(StatusResponse.ERROR.getValue());
-            errorDto.setTimestamp_OUT(getDateStringISO8601(new Date()));
+            errorDto.setTimestampOut(getDateStringISO8601(new Date()));
             errorDto.setPayload("Error al construir la respuesta: " + e.getMessage());
             exchange.getMessage().setBody(new Gson().toJson(errorDto));
-            throw new RuntimeException("Fallo al construir la respuesta", e);
         }
     }
 }

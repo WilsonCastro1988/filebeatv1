@@ -1,32 +1,17 @@
 package com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.route;
 
-import com.banred.ms_middleware_signcrypt.common.exception.AbstractException;
-import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.*;
+import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.InstitutionLookupProcessor;
 import org.apache.camel.builder.RouteBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class OperationRoute extends RouteBuilder {
 
-    @Autowired
-    private InstitutionLookupProcessor institutionLookupProcessor;
-    @Autowired
-    private MtlsProcessor mtlsRequestProcessor;
-    @Autowired
-    private ResponseProcessor responseProcessor;
+    private final InstitutionLookupProcessor institutionLookupProcessor;
 
-    @Autowired
-    private JweDecryptProcessor jweDecryptProcessor;
-    @Autowired
-    private JwsVerifySignProcessor jwsVerifyProcessor;
-
-
-    @Autowired
-    private JwsProcessor jwsProcessor;
-    @Autowired
-    private JweProcessor jweProcessor;
-
+    public OperationRoute(InstitutionLookupProcessor institutionLookupProcessor) {
+        this.institutionLookupProcessor = institutionLookupProcessor;
+    }
 
     @Override
     public void configure() {

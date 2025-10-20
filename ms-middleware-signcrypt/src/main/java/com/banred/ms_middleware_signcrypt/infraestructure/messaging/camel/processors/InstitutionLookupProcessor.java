@@ -1,12 +1,11 @@
 package com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors;
 
+import com.banred.ms_middleware_signcrypt.common.exception.AbstractError;
 import com.banred.ms_middleware_signcrypt.domain.apim.dto.APIMRequestDTO;
 import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Institution;
 import com.banred.ms_middleware_signcrypt.domain.institution.service.IInstitutionRedisService;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -17,7 +16,6 @@ import static com.banred.ms_middleware_signcrypt.common.util.Utilities.jsonToDto
 @Component
 public class InstitutionLookupProcessor implements Processor {
 
-    private static final Logger logger = LoggerFactory.getLogger(InstitutionLookupProcessor.class);
 
     private final IInstitutionRedisService institutionRedisService;
 
@@ -29,10 +27,10 @@ public class InstitutionLookupProcessor implements Processor {
     public void process(Exchange exchange) {
         try {
             APIMRequestDTO apimRequestDTO = jsonToDtoConverter(exchange.getIn().getBody(String.class));
-            Institution institution = institutionRedisService.getInstitution(apimRequestDTO.getxEntityID());
+            Institution institution = institutionRedisService.getInstitution(apimRequestDTO.getXEntityID());
 
             if (institution == null || institution.getEndpoint() == null) {
-                throw new RuntimeException("Institución no encontrada o endpoint no definido");
+                throw new AbstractError("400", "Institución no encontrada o endpoint no definido", "T");
             }
 
             exchange.getIn().setHeader("ifiEndpoint", institution.getEndpoint());

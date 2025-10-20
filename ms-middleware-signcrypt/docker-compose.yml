@@ -8,7 +8,7 @@ services:
       - "8442:8442"
     environment:
       - SERVER_PORT=8442
-      - REDIS_HOSTNAME=redis
+      - REDIS_HOSTNAME=localhost
       - REDIS_PORT=6379
       - REDIS_PASSWORD=Passw0rd
       - RUTA_CONFIG_XML=/etc/tls/config-service.xml
@@ -28,10 +28,10 @@ services:
       - CAMEL_COMPONENT_ELASTICSEARCH_HOSTADDRESSES=elasticsearch:9200
       - JAVA_TOOL_OPTIONS=-Djavax.net.debug=ssl:handshake:verbose -Dreactor.netty.log.level=DEBUG
     volumes:
-      - /C/etc/logs:/logs
-      - /C/etc/tls/config-service.xml:/etc/tls/config-service.xml
-      - /C/etc/tls/certs/ca/crl/crl.der:/etc/tls/certs/ca/crl/crl.der
-      - /C/etc/tls/rsa-keys:/etc/tls/rsa-keys
+      - /etc/logs:/logs
+      - /etc/tls/config-service.xml:/etc/tls/config-service.xml
+      - /etc/tls/certs/ca/crl/crl.der:/etc/tls/certs/ca/crl/crl.der
+      - /etc/tls/rsa-keys:/etc/tls/rsa-keys
     depends_on:
       - redis
       - elasticsearch
@@ -90,7 +90,7 @@ services:
     entrypoint: "filebeat -e -strict.perms=false"
     volumes:
       - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - /C/etc/logs:/logs:ro
+      - /etc/logs:/logs:ro
     depends_on:
       - elasticsearch
       - ms-middleware-signcrypt

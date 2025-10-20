@@ -1,27 +1,31 @@
 package com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.route;
 
-import com.banred.ms_middleware_signcrypt.common.exception.AbstractException;
 import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.JweDecryptProcessor;
 import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.JwsVerifySignProcessor;
 import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.MtlsProcessor;
 import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.ResponseProcessor;
 import org.apache.camel.builder.RouteBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class OperationINRoute extends RouteBuilder {
 
 
-    @Autowired
-    private MtlsProcessor mtlsRequestProcessor;
-    @Autowired
-    private ResponseProcessor responseProcessor;
+    private final MtlsProcessor mtlsRequestProcessor;
+    private final ResponseProcessor responseProcessor;
+    private final JweDecryptProcessor jweDecryptProcessor;
+    private final JwsVerifySignProcessor jwsVerifyProcessor;
 
-    @Autowired
-    private JweDecryptProcessor jweDecryptProcessor;
-    @Autowired
-    private JwsVerifySignProcessor jwsVerifyProcessor;
+
+    public OperationINRoute(MtlsProcessor mtlsRequestProcessor,
+                            ResponseProcessor responseProcessor,
+                            JweDecryptProcessor jweDecryptProcessor,
+                            JwsVerifySignProcessor jwsVerifyProcessor) {
+        this.mtlsRequestProcessor = mtlsRequestProcessor;
+        this.responseProcessor = responseProcessor;
+        this.jweDecryptProcessor = jweDecryptProcessor;
+        this.jwsVerifyProcessor = jwsVerifyProcessor;
+    }
 
 
     @Override

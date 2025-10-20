@@ -5,28 +5,28 @@ import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.proces
 import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.MtlsProcessor;
 import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.ResponseProcessor;
 import org.apache.camel.builder.RouteBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class OperationOUTRoute extends RouteBuilder {
 
+    private final MtlsProcessor mtlsRequestProcessor;
+    private final ResponseProcessor responseProcessor;
+    private final JwsProcessor jwsProcessor;
+    private final JweProcessor jweProcessor;
 
-    @Autowired
-    private MtlsProcessor mtlsRequestProcessor;
-    @Autowired
-    private ResponseProcessor responseProcessor;
-
-
-    @Autowired
-    private JwsProcessor jwsProcessor;
-    @Autowired
-    private JweProcessor jweProcessor;
+    public OperationOUTRoute(MtlsProcessor mtlsRequestProcessor, ResponseProcessor responseProcessor,
+                             JwsProcessor jwsProcessor, JweProcessor jweProcessor) {
+        this.mtlsRequestProcessor = mtlsRequestProcessor;
+        this.responseProcessor = responseProcessor;
+        this.jwsProcessor = jwsProcessor;
+        this.jweProcessor = jweProcessor;
+    }
 
 
     @Override
     public void configure() {
-       from("direct:operation_out_flow")
+        from("direct:operation_out_flow")
                 .routeId("operation_out_flow")
                 .log("➡️ Dirección OUT detectada")
                 .choice()

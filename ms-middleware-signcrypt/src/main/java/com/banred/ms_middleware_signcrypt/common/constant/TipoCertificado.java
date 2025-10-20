@@ -1,5 +1,8 @@
 package com.banred.ms_middleware_signcrypt.common.constant;
 
+import lombok.Getter;
+
+@Getter
 public enum TipoCertificado {
     PUBLIC("PUBLIC"),
     PRIVATE("PRIVATE"),
@@ -9,10 +12,6 @@ public enum TipoCertificado {
 
     TipoCertificado(String value) {
         this.value = value;
-    }
-
-    public String getValue() {
-        return value;
     }
 
     public static TipoCertificado fromValue(String value) {

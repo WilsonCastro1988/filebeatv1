@@ -17,7 +17,7 @@ public class InstitutionRedisServiceImpl  implements IInstitutionRedisService {
 
     @Override
     public void saveInstitutions(Institutions institutions) {
-        for(Institution institution : institutions.getInstitutions()){
+        for(Institution institution : institutions.getInstitutionList()){
             redisTemplate.opsForValue().set("institution:" + institution.getId(), institution);
         }
     }

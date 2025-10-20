@@ -1,5 +1,8 @@
 package com.banred.ms_middleware_signcrypt.common.constant;
 
+import lombok.Getter;
+
+@Getter
 public enum StatusResponse {
     SUCCESS("SUCCESS"),
     FAILURE("FAILURE"),
@@ -9,10 +12,6 @@ public enum StatusResponse {
 
     StatusResponse(String value) {
         this.value = value;
-    }
-
-    public String getValue() {
-        return value;
     }
 
     public static StatusResponse fromValue(String value) {

@@ -1,6 +1,8 @@
 package com.banred.ms_middleware_signcrypt.common.exception.payloads;
 
-public interface IBodyError {
+import java.io.Serializable;
+
+public interface IBodyError extends Serializable{
     String getTipo();
 
     void setTipo(String var1);

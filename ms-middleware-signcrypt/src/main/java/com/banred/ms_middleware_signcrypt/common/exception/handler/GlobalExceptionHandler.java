@@ -17,9 +17,9 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponseDto> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
+        ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
         errorBody.put("status", ex.getCodigoHttp());
         errorBody.put("error", ex.getMessage());
         errorBody.put("error_description", ex.getTipo());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorBody);
+        return ResponseEntity.status(ex.getCodigoHttp()).body(errorBody);
     }
 
 }

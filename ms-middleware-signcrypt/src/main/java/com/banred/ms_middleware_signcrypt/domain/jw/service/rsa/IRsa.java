@@ -8,9 +8,9 @@ public interface IRsa {
 
     String descifrar(String base64CipherText, String keybase64) throws AbstractException;
 
-    String getPrivateKey(String canal, String codCliente, String tipo, String path) throws Exception;
+    String getPrivateKey(String canal, String codCliente, String tipo, String path) throws AbstractException;
 
-    String getPublicKey(String canal, String codCliente, String tipo, String path) throws Exception;
+    String getPublicKey(String canal, String codCliente, String tipo, String path) throws AbstractException;
 
 
 }

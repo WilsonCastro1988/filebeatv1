@@ -2,7 +2,6 @@ package com.banred.ms_middleware_signcrypt.domain.mtls.service.impl;
 
 import com.banred.ms_middleware_signcrypt.common.exception.AbstractError;
 import com.banred.ms_middleware_signcrypt.components.X509CertificateValidator;
-import com.banred.ms_middleware_signcrypt.components.X509CertificateValidatorV2;
 import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Institution;
 import com.banred.ms_middleware_signcrypt.domain.mtls.service.WebClientService;
 import io.netty.channel.ChannelHandlerContext;
@@ -19,11 +18,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
 import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.security.KeyStore;
+import java.io.IOException;
+import java.security.*;
+import java.security.cert.CertificateException;
 import java.time.Duration;
 
 @Service
@@ -31,9 +30,9 @@ public class WebClientServiceImpl implements WebClientService {
 
     private static final Logger logger = LoggerFactory.getLogger(WebClientServiceImpl.class);
 
-    private final X509CertificateValidatorV2 certificateValidator;
+    private final X509CertificateValidator certificateValidator;
 
-    public WebClientServiceImpl(X509CertificateValidatorV2 certificateValidator) {
+    public WebClientServiceImpl(X509CertificateValidator certificateValidator) {
         this.certificateValidator = certificateValidator;
     }
 
@@ -42,19 +41,18 @@ public class WebClientServiceImpl implements WebClientService {
         try {
             // 1. Configurar KeyStore y TrustStore
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            try (FileInputStream fis = new FileInputStream(institution.getMtls().getKeystore())) {
-                keyStore.load(fis, institution.getMtls().getKeystorePassword().toCharArray());
-            }
+            FileInputStream fis = new FileInputStream(institution.getMtls().getKeystore());
+            keyStore.load(fis, institution.getMtls().getKeystorePassword().toCharArray());
+
             KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             kmf.init(keyStore, institution.getMtls().getKeystorePassword().toCharArray());
 
             KeyStore trustStore = KeyStore.getInstance("PKCS12");
-            try (FileInputStream fis = new FileInputStream(institution.getMtls().getTruststore())) {
-                trustStore.load(fis, institution.getMtls().getTruststorePassword().toCharArray());
-            }
+            fis = new FileInputStream(institution.getMtls().getTruststore());
+            trustStore.load(fis, institution.getMtls().getTruststorePassword().toCharArray());
+
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(trustStore);
-
 
             certificateValidator.validateKeyStoreCertificates(keyStore, trustStore, institution);
 
@@ -67,29 +65,19 @@ public class WebClientServiceImpl implements WebClientService {
                     .trustManager(tmf)
                     .build();
 
-            // 3. Crear HttpClient con SSL
-            /*HttpClient httpClient = HttpClient.create()
-                    .secure(sslSpec -> sslSpec.sslContext(sslCtx))
-                    .responseTimeout(Duration.ofMillis(institution.getTimeout()));
-
-             */
-
             HttpClient httpClient = HttpClient.create()
                     .secure(sslSpec -> sslSpec.sslContext(sslCtx))
                     .doOnConnected(conn -> conn.addHandlerLast(new ChannelInboundHandlerAdapter() {
                         @Override
                         public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-                            if (evt instanceof SslHandshakeCompletionEvent) {
-                                SslHandshakeCompletionEvent handshakeEvent = (SslHandshakeCompletionEvent) evt;
-                                if (!handshakeEvent.isSuccess()) {
-                                    throw new AbstractError("401", handshakeEvent.cause().getMessage(), "N");
-                                }
+                            if (evt instanceof SslHandshakeCompletionEvent handshakeEvent && !handshakeEvent.isSuccess()) {
+                                throw new AbstractError("401", handshakeEvent.cause().getMessage(), "N");
                             }
+
                             super.userEventTriggered(ctx, evt);
                         }
                     }))
                     .responseTimeout(Duration.ofMillis(institution.getTimeout()));
-
 
             // 4. Crear WebClient
             WebClient webClient = WebClient.builder()
@@ -99,18 +87,9 @@ public class WebClientServiceImpl implements WebClientService {
 
             logger.info("WebClient con MTLS creado para institución {}", institution.getId());
             return webClient;
-
-        } catch (FileNotFoundException e) {
-            throw new AbstractError("401", "RECHAZADA", "N");
+        } catch (IOException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException |
+                 CertificateException | NoSuchProviderException e) {
+            throw new AbstractError(e, "Error creando WebClient para institución");
         }
-        catch (Exception e) {
-            logger.error("Error creando WebClient para institución {}", institution.getId(), e);
-            throw new RuntimeException("Error inicializando WebClient con MTLS", e);
-        }
-    }
-
-    private String decrypt(String encryptedPassword) {
-        // TODO: implementar desencriptación real
-        return encryptedPassword;
     }
 }

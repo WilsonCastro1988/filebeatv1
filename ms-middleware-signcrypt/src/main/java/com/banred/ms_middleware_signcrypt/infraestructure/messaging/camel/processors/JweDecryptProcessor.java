@@ -3,13 +3,13 @@ package com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.proce
 import com.banred.ms_middleware_signcrypt.domain.apim.dto.APIMRequestDTO;
 import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Institution;
 import com.banred.ms_middleware_signcrypt.domain.jw.service.CryptoService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
 
 @Component
 public class JweDecryptProcessor implements Processor {
@@ -37,9 +37,11 @@ public class JweDecryptProcessor implements Processor {
             }
 
             APIMRequestDTO obj = jsonToDtoConverter(encryptedMessage);
+            if (obj == null) {
+                throw new IllegalArgumentException("El objeto APIMRequestDTO no puede ser nulo");
+            }
             String jwsCompact = cryptoService.decrypt(obj.getData(), institution);
             logger.info("📤 Datos descifrados: {}", jwsCompact);
-
 
             exchange.setProperty("jwsCompact", jwsCompact);
             exchange.getMessage().setBody(jwsCompact);
@@ -52,8 +54,7 @@ public class JweDecryptProcessor implements Processor {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.readValue(jsonObject, APIMRequestDTO.class);
-        } catch (Exception e) {
-            logger.error("ERROR from InstitutionLookUpProcessor", e);
+        } catch (JsonProcessingException e) {
             return null;
         }
     }

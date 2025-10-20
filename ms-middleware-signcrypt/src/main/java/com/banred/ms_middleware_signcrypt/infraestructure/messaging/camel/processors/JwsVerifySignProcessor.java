@@ -43,7 +43,7 @@ public class JwsVerifySignProcessor implements Processor {
                 throw new IllegalStateException("Faltan headers: digest, Signature-Input o Signature");
             }
 
-            // 🔹 Verificar todo el contenido criptográfico
+            // 🔹 Verificar todoel contenido criptográfico
             cryptoService.verifyWithHeaders(jwsCompact, digestHeader, signatureInput, institution);
 
             // 🔹 Extraer contenido firmado si se requiere

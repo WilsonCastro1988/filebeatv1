@@ -20,7 +20,7 @@ public class APIMRequestDTO implements Serializable {
 
     @NotBlank(message = "Campo es requerido")
     @Size(max = 10, message = "Longitud no puede tener más de 10 caracteres")
-    @Pattern(regexp = "^[0-9]{4,10}$", message = "Campo debe contener mínimo 4 caracteres")
+    @Pattern(regexp = "^\\d{4,10}$", message = "Campo debe contener mínimo 4 caracteres")
     private String xEntityID;
 
     @NotBlank(message = "Campo es requerido")
@@ -37,43 +37,4 @@ public class APIMRequestDTO implements Serializable {
     @Valid
     private SignatureDTO sign;
 
-    public String getxEntityID() {
-        return xEntityID;
-    }
-
-    public void setxEntityID(String xEntityID) {
-        this.xEntityID = xEntityID;
-    }
-
-    public String getDirection() {
-        return direction;
-    }
-
-    public void setDirection(String direction) {
-        this.direction = direction;
-    }
-
-    public String getData() {
-        return data;
-    }
-
-    public void setData(String data) {
-        this.data = data;
-    }
-
-    public String getxKey() {
-        return xKey;
-    }
-
-    public void setxKey(String xKey) {
-        this.xKey = xKey;
-    }
-
-    public SignatureDTO getSign() {
-        return sign;
-    }
-
-    public void setSign(SignatureDTO sign) {
-        this.sign = sign;
-    }
 }

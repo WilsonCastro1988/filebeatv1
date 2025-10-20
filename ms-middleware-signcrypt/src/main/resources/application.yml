@@ -6,6 +6,19 @@ info:
   email: darcos@banred.fin.ec, wcastro@banred.fin.ec
   description: ms-middleware-signcrypt
 
+jasypt:
+  encryptor:
+    algorithm: PBEWITHHMACSHA512ANDAES_256
+    key-obtention-iterations: 1000
+    pool-size: 1
+    salt-generator-classname: org.jasypt.salt.RandomSaltGenerator
+    iv-generator-classname: org.jasypt.iv.RandomIvGenerator
+    string-output-type: base64
+    password: KcNcOTIseNsxSnD+PcHWp5H6K08ZUqGMIf7WggPE5TegDU0O9ruF+2Bn4CJW2MFF6sKjc3oDlAEy/JQiY+1Nqg==
+    skip-property-sources:
+      - org.springframework.boot.env.RandomValuePropertySource
+      - org.springframework.boot.ansi.AnsiPropertySource
+
 server:
   port: ${SERVER_PORT:8442}
   servlet:
@@ -63,10 +76,6 @@ camel:
   component:
     servlet:
       enabled: true
-    elasticsearch:
-      enabled: true
-      clusterName: docker-cluster
-      hostAddresses: elasticsearch:9200
     saga:
       enabled: false
   springboot:
@@ -74,11 +83,11 @@ camel:
 
 microservice:
   parameters:
-    REDIS_PORT: ${REDIS_PORT:6379}
-    REDIS_USERNAME: ${REDIS_USERNAME:}
-    REDIS_PASSWORD: ${REDIS_PASSWORD:}
-    REDIS_HOSTNAME: ${REDIS_HOSTNAME:localhost}
-    RUTA_CONFIG_XML: ${RUTA_CONFIG_XML:C:/etc/tls/config-service.xml}
-    RUTA_CRL: ${RUTA_CRL:C:/etc/tls/certs/ca/crl/crl.der}
-    RUTA_RSA: ${RUTA_CRL:C:/etc/tls/rsa-keys}
-    EXPIRY_SECONDS: ${EXPIRY_SECONDS:300}
+    REDIS_PORT: ${REDIS_PORT}
+    REDIS_USERNAME: ${REDIS_USERNAME}
+    REDIS_PASSWORD: ${REDIS_PASSWORD}
+    REDIS_HOSTNAME: ${REDIS_HOSTNAME}
+    RUTA_CONFIG_XML: ${RUTA_CONFIG_XML}
+    RUTA_CRL: ${RUTA_CRL}
+    RUTA_RSA: ${RUTA_CRL}
+    EXPIRY_SECONDS: ${EXPIRY_SECONDS}

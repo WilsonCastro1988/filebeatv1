@@ -1,39 +1,44 @@
 package com.banred.ms_middleware_signcrypt.domain.jw.service.aes256;
 
+import com.banred.ms_middleware_signcrypt.common.constant.TipoArgorithm;
 import com.banred.ms_middleware_signcrypt.common.exception.AbstractError;
-import com.banred.ms_middleware_signcrypt.common.exception.AbstractException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 
 @Service
 public class Aes256 implements IAes256 {
-    private static final String ALGORITHM = "AES";
+
     private static final String ENCRYPTION_ALGORITHM = "AES/GCM/NoPadding";
     private static final int IV_LENGTH = 12; // 96 bits recomendado para GCM
     private static final int TAG_LENGTH_BIT = 128; // 16 bytes
     private static final int AES_KEY_SIZE = 256;
-    private static final Logger LOGGER = LoggerFactory.getLogger(Aes256.class);
+    
 
     public Aes256() {
+        // Default constructor intentionally left empty as no initialization is required.
     }
 
-    public String cifrar(String plaintext, String base64Key) throws AbstractException {
+    public String cifrar(String plaintext, String base64Key) {
         validarEntradasCifrado(plaintext, base64Key);
 
         byte[] keyBytes = Base64.getDecoder().decode(base64Key);
         validarTamanioLlave(keyBytes);
-        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, ALGORITHM);
+        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, TipoArgorithm.AES.getValue());
 
         try {
             Cipher cipher = Cipher.getInstance(ENCRYPTION_ALGORITHM);
@@ -45,18 +50,17 @@ public class Aes256 implements IAes256 {
             byte[] encrypted = concatenarIvYTextoCifrado(iv, ciphertext);
 
             return Base64.getEncoder().encodeToString(encrypted);
-        } catch (Exception e) {
-            LOGGER.error("ERROR AL CIFRAR DATO CON AES-256-GCM", e);
-            throw new AbstractError(e, "Aes256.cifrar");
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
+            throw new AbstractError("3005", "Error al cifrar dato con AES-256-GCM.", "Aes256.cifrar", e);
         }
     }
 
-    public String descifrar(String base64Ciphertext, String base64Key) throws AbstractException {
+    public String descifrar(String base64Ciphertext, String base64Key) {
         validarEntradasDescifrado(base64Ciphertext, base64Key);
 
         byte[] keyBytes = Base64.getDecoder().decode(base64Key);
         validarTamanioLlave(keyBytes);
-        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, ALGORITHM);
+        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, TipoArgorithm.AES.getValue());
 
         byte[] encryptedBytes = Base64.getDecoder().decode(base64Ciphertext);
         validarEncryptedBytes(encryptedBytes);
@@ -71,26 +75,24 @@ public class Aes256 implements IAes256 {
 
             byte[] decryptedBytes = cipher.doFinal(ciphertext);
             return new String(decryptedBytes, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            LOGGER.error("ERROR AL DESCIFRAR DATO CON AES-256-GCM", e);
-            throw new AbstractError(e, "Aes256.descifrar");
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
+            throw new AbstractError("3006", "Error al descifrar dato con AES-256-GCM.", "Aes256.descifrar", e);
         }
     }
 
-    public String generarLlave() throws AbstractException {
+    public String generarLlave() {
         try {
-            KeyGenerator keyGen = KeyGenerator.getInstance(ALGORITHM);
+            KeyGenerator keyGen = KeyGenerator.getInstance(TipoArgorithm.AES.getValue());
             keyGen.init(AES_KEY_SIZE, new SecureRandom());
             SecretKey secretKey = keyGen.generateKey();
             return Base64.getEncoder().encodeToString(secretKey.getEncoded());
         } catch (NoSuchAlgorithmException e) {
-            LOGGER.error("ERROR AL GENERAR LLAVE AES-256", e);
             throw new AbstractError(e, "Aes256.generarLlave");
         }
     }
 
 
-    private void validarEntradasCifrado(String plaintext, String base64Key) throws AbstractError {
+    private void validarEntradasCifrado(String plaintext, String base64Key) {
         if (plaintext == null || base64Key == null) {
             throw new AbstractError("3001", "El texto plano y la llave no deben ser null.", "Aes256.validarEntradasCifrado");
         }
