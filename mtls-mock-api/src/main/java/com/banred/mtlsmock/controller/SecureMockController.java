@@ -1,47 +1,62 @@
 package com.banred.mtlsmock.controller;
 
+import com.banred.mtlsmock.model.ResponseMock;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 @RestController
-@RequestMapping("/api/secure")
+@RequestMapping("/secure")
 public class SecureMockController {
 
-    @GetMapping("/mtls")
-    public ResponseEntity<String> getMtls(Principal principal) {
-        return ResponseEntity.ok("✅ Hi from MockTls XD  " + principal.getName() +
-                ", conexión mTLS establecida con éxito!");
+    @PostMapping(value = "/mtlsi")
+    public ResponseEntity<String> postMtlsi(@RequestBody String payload, @RequestHeader HttpHeaders headers) {
+        return construirRespuesta("✅ RESPONSE OPERACION OPCION I : INQUERY", payload, headers);
     }
 
-    @PostMapping("/mtls")
-    public ResponseEntity<Map<String, Object>> postMtls(@RequestBody String payload, @RequestHeader HttpHeaders headers) {
+    @PostMapping("/mtlst")
+    public ResponseEntity<String> postMtlst(@RequestBody String payload, @RequestHeader HttpHeaders headers) {
+        return construirRespuesta("✅ RESPONSE OPERACION OPCION T: TRANSACTION/TRANSFER", payload, headers);
+    }
+
+    @PostMapping("/mtlsn")
+    public ResponseEntity<String> postMtlsn(@RequestBody String payload, @RequestHeader HttpHeaders headers) {
+        return construirRespuesta("✅ RESPONSE OPERACION OPCION N: NOTIFICATION", payload, headers);
+    }
+
+    @PostMapping("/mtlse")
+    public ResponseEntity<String> postMtlse(@RequestBody String payload, @RequestHeader HttpHeaders headers) {
+        return construirRespuesta("✅ RESPONSE OPERACION OPCION E: ENROLLMENT", payload, headers);
+    }
+
+    @PostMapping("/mtlsde")
+    public ResponseEntity<String> postMtlsde(@RequestBody String payload, @RequestHeader HttpHeaders headers) {
+        return construirRespuesta("✅ RESPONSE OPERACION OPCION DE: DISENROLLMENT", payload, headers);
+    }
+    @PostMapping("/mtlsma")
+    public ResponseEntity<String> postMtlsma(@RequestBody String payload, @RequestHeader HttpHeaders headers) {
+        return construirRespuesta("✅ RESPONSE OPERACION OPCION MA: MODIFY ALIAS", payload, headers);
+    }
+
+    public ResponseEntity<String> construirRespuesta(String status, String payload, HttpHeaders headers) {
+        ObjectMapper mapper = new ObjectMapper();
+
+        ResponseMock responseMock = new ResponseMock();
+        responseMock.setStatus(status);
+        responseMock.setPayload(payload);
+        responseMock.setHeaders(headers);
+
+        String jsonResponse = null;
         try {
-            Map<String, Object> response = new HashMap<>();
-
-            Map<String, String> headerMap = new HashMap<>();
-            for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-                headerMap.put(entry.getKey(), entry.getValue().get(0)); // Tomar el primer valor si hay múltiples
-            }
-
-            // Construir respuesta estructurada
-            response.put("status", "✅ Hi AGAIN from MockTls!");
-            response.put("payload", payload);
-            response.put("headers", headerMap);
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("status", "✅ FAIL from MockTls XD");
-            errorResponse.put("error", e.getMessage());
-            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+            jsonResponse = mapper.writeValueAsString(responseMock);
+        } catch (JsonProcessingException e) {
+            jsonResponse = "✅ FAIL from MockTls XD";
         }
+
+        return ResponseEntity
+                .ok(jsonResponse);
     }
 
 }

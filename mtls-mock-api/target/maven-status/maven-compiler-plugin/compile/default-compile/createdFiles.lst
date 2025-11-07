@@ -4,5 +4,6 @@ com\banred\mtlsmock\controller\SecureMockController.class
 com\banred\mtlsmock\service\RedisUserDetailsService.class
 com\banred\mtlsmock\filter\MtlsAndBasicAuthFilter.class
 com\banred\mtlsmock\MtlsMockApplication.class
+com\banred\mtlsmock\model\ResponseMock.class
 com\banred\mtlsmock\model\UserRecord.class
 com\banred\mtlsmock\init\RedisInit.class

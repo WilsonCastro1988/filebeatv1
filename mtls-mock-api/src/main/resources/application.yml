@@ -1,26 +1,74 @@
-server.port=8443
-server.address=0.0.0.0
-logging.level.org.springframework.security=DEBUG
+info:
+  version: 1.0.0
+  date: 2025-04-22
+  stage: development
+  author: Wilson Castro L..
+  email: wcastro@banred.fin.ec
+  description: Microservicio Mock Server Mtls para PD
+jasypt:
+  encryptor:
+    algorithm: PBEWITHHMACSHA512ANDAES_256
+    key-obtention-iterations: 100000
+    pool-size: 1
+    salt-generator-classname: org.jasypt.salt.RandomSaltGenerator
+    iv-generator-classname: org.jasypt.iv.RandomIvGenerator
+    string-output-type: base64
+    provider-name: SunJCE
+    password: Sk/uXJSiwA8Ol2F59NnMBj9k7NYviJ06OOCz3DO7KU8ktqqHBnkt+EkEgJHu4133
+    skip-property-sources:
+      - org.springframework.boot.env.RandomValuePropertySource
+      - org.springframework.boot.ansi.AnsiPropertySource
 
-server.ssl.key-store=C:/etc/tls/certs/server/server-keystore.p12
-server.ssl.key-store-password=serverpass
-#server.ssl.key-store=C:/etc/tls/crt-casos/ca-keystore.p12
-#server.ssl.key-store-password=capass
-server.ssl.key-store-type=PKCS12
-server.ssl.key-alias=server
+server:
+  port: 8443
+  address: 0.0.0.0
+  servlet:
+    context-path: /api
+  compression:
+    enabled: true
+  error:
+    include-message: never
+    include-binding-errors: always
+    include-stacktrace: never
+    include-exception: false
+  undertow:
+    threads:
+      io: 10
+      worker: 256
+    allow-encoded-slash: false
+    always-set-keep-alive: true
+    decode-url: true
+    eager-filter-init: true
+    max-cookies: 200
+    max-headers: 200
+    max-http-post-size: 10MB
+    preserve-path-on-forward: false
+    url-charset: UTF-8
+  ssl:
+    key-store: ${SERVER_SSL_KEY_STORE}
+    key-store-password: ${SERVER_SSL_KEY_STORE_PASSWORD}
+    key-store-type: ${SERVER_SSL_KEY_STORE_TYPE}
+    key-alias: ${SERVER_SSL_KEY_ALIAS}
+    trust-store: ${SERVER_SSL_TRUST_STORE}
+    trust-store-password: ${SERVER_SSL_TRUST_STORE_PASSWORD}
+    trust-store-type: ${SERVER_SSL_TRUST_STORE_TYPE}
+    client-auth: want #${SERVER_SSL_CLIENT_AUTH}
 
-server.ssl.trust-store=C:/etc/tls/certs/server/server-truststore.p12
-server.ssl.trust-store-password=serverpass
-#server.ssl.trust-store=C:/etc/tls/crt-casos/ca-truststore.p12
-#server.ssl.trust-store-password=capass
-server.ssl.trust-store-type=PKCS12
+test:
+  encrypted-password: TEST  # Same as your truststore pass
 
-#need: siempre solicta certificados
-#want: puede no siempre solictyar certificados
-#none: no pide nada
-server.ssl.client-auth=want
+logging:
+  level:
+    org.springframework.security: DEBUG
+    com.ulisesbocchio.jasyptspringboot: DEBUG  # Logs decryption attempts
+    org.jasypt: DEBUG  # Logs Jasypt core operations
 
-# Redis
-spring.data.redis.host=localhost
-spring.data.redis.port=6379
-spring.data.redis.timeout=60000
+microservice:
+  parameters:
+    pass_admin_mock: ${MICROSERVICE_PARAMETERS_PASS_ADMIN_MOCK}
+  redis:
+    host: ${SPRING_DATA_REDIS_HOST}
+    port: ${SPRING_DATA_REDIS_PORT}
+    username: ${SPRING_DATA_REDIS_USERNAME}
+    password: ${SPRING_DATA_REDIS_PASSWORD}
+    timeout: ${SPRING_DATA_REDIS_TIMEOUT}

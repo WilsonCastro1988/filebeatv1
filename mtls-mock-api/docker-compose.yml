@@ -1,9 +1,11 @@
 services:
-  ms-mtls-server-mock:
+  ms-mtls-mock-server:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ms-mtls-server-mock
+    user: devopsa
+    container_name: ms-mtls-mock-server
+    restart: always
     ports:
       - "8443:8443"
     environment:
@@ -19,17 +21,17 @@ services:
       - SERVER_SSL_TRUST_STORE_PASSWORD=serverpass
       - SERVER_SSL_TRUST_STORE_TYPE=PKCS12
       - SERVER_SSL_CLIENT_AUTH=need
-      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_HOST=192.168.100.228
       - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_DATA_REDIS_USERNAME=admin
       - SPRING_DATA_REDIS_PASSWORD=Passw0rd
       - SPRING_DATA_REDIS_TIMEOUT=60000
-      - LOGGING_FILE_NAME=/logs/mockserver.log
-      - LOGGING_LOGBACK_ROLLINGPOLICY_FILE_NAME_PATTERN=/logs/mockserver.%d{yyyy-MM-dd}.log
-      - LOGGING_LOGBACK_ROLLINGPOLICY_MAX_HISTORY=7
-      - LOGGING_LOGBACK_ROLLINGPOLICY_TOTAL_SIZE_CAP=1GB
+      - MICROSERVICE_PARAMETERS_PASS_ADMIN_MOCK=adminpass
+      - LOGGING_FILE_NAME=/home/devopsa/microservicios/logs/mockserver.log
       - JAVA_OPTS=-Xms256m -Xmx512m -Djava.security.egd=file:/dev/./urandom
     volumes:
-      - /C/etc/logs:/logs
+      - /c/home/devopsa/microservicios/ms-mtls-mock-server/logs:/logs
+      - /c/home/devopsa/microservicios/certs/server:/etc/tls/certs/server
     deploy:
       resources:
         limits:
@@ -37,8 +39,10 @@ services:
           memory: 512M
     networks:
       - signcrypt-network
-    restart: unless-stopped
 
 networks:
   signcrypt-network:
     driver: bridge
+
+volumes:
+  cache-data:
