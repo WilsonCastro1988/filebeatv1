@@ -29,10 +29,9 @@ public class JweProcessor implements Processor {
             if (institution.getJwe() != null && institution.getJwe().isEnable()) {
                 logger.info("🔐 Aplicando JWE para institución {}", institution.getId());
 
-                String payload = exchange.getMessage().getBody(String.class);
+                String payloadDigest = exchange.getMessage().getBody(String.class);
 
-                // Cifrar el contenido
-                String encryptedData = cryptoService.encrypt(payload, institution);
+                String encryptedData = cryptoService.encrypt(payloadDigest, institution);
                 JWEObject jweObject = JWEObject.parse(encryptedData);
                 String jweCompact = jweObject.serialize();
                 String xKey = (String) jweObject.getHeader().getCustomParam("x-key"); // Asume que CryptoService lo incluye

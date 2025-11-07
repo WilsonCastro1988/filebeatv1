@@ -1,0 +1,259 @@
+---
+# --- Namespace ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pts
+  labels:
+    app: ms-middleware-signcrypt
+---
+# --- PersistentVolume: Logs ---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-ms-logs
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  hostPath:
+    path: /data/ms-middleware-signcrypt/logs
+    type: DirectoryOrCreate
+---
+# --- PersistentVolumeClaim: Logs ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-ms-logs
+  namespace: pts
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+---
+# --- ConfigMap: redis-acl (único permitido: Redis ACLs) ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-acl
+  namespace: pts
+data:
+  users.acl: |
+    user admin on >Passw0rd ~* +@all
+    user default off
+---
+# --- Redis con ACLs (único ConfigMap permitido) ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: pts
+  labels:
+    app: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7
+          ports:
+            - containerPort: 6379
+          command:
+            - redis-server
+            - --aclfile
+            - /usr/local/etc/redis/users.acl
+            - --save
+            - ""
+            - --appendonly
+            - "no"
+          volumeMounts:
+            - name: acl
+              mountPath: /usr/local/etc/redis/users.acl
+              subPath: users.acl
+            - name: data
+              mountPath: /data
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+      volumes:
+        - name: acl
+          configMap:
+            name: redis-acl
+        - name: data
+          hostPath:
+            path: /data/redis
+            type: DirectoryOrCreate
+---
+# --- Redis Service ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: pts
+spec:
+  selector:
+    app: redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+  type: ClusterIP
+---
+# --- Deployment: ms-middleware-signcrypt ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-middleware-signcrypt
+  namespace: pts
+  labels:
+    app: ms-middleware-signcrypt
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: ms-middleware-signcrypt
+  template:
+    metadata:
+      labels:
+        app: ms-middleware-signcrypt
+    spec:
+      containers:
+        - name: ms-middleware-signcrypt
+          image: registry.tu-dominio.com/ms-middleware-signcrypt:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8442
+          env:
+            - name: SERVER_PORT
+              value: "8442"
+            - name: SERVER_ADDRESS
+              value: "0.0.0.0"
+            - name: REDIS_HOSTNAME
+              value: "redis"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_USERNAME
+              value: "admin"
+            - name: REDIS_PASSWORD
+              value: "Passw0rd"
+            - name: RUTA_CONFIG_XML
+              value: "/etc/tls/config-service.xml"
+            - name: RUTA_CRL
+              value: "/etc/tls/certs/ca/crl/crl.der"
+            - name: RUTA_RSA
+              value: "/etc/tls/rsa-keys"
+            - name: LOGGING_FILE_NAME
+              value: "/var/log/app.log"
+          volumeMounts:
+            - name: logs
+              mountPath: /var/log
+            - name: config-xml
+              mountPath: /etc/tls/config-service.xml
+              subPath: config-service.xml
+            - name: crl-file
+              mountPath: /etc/tls/certs/ca/crl/crl.der
+              subPath: crl.der
+            - name: rsa-keys
+              mountPath: /etc/tls/rsa-keys
+          resources:
+            limits:
+              memory: "2Gi"
+              cpu: "1500m"
+            requests:
+              memory: "1Gi"
+              cpu: "800m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8442
+              scheme: HTTPS
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8442
+              scheme: HTTPS
+            initialDelaySeconds: 60
+            periodSeconds: 15
+      volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: pvc-ms-logs
+        - name: config-xml
+          hostPath:
+            path: /opt/ms-middleware-signcrypt/config/config-service.xml
+            type: File
+        - name: crl-file
+          hostPath:
+            path: /opt/ms-middleware-signcrypt/certs/ca/crl/crl.der
+            type: File
+        - name: rsa-keys
+          hostPath:
+            path: /opt/ms-middleware-signcrypt/rsa-keys
+            type: Directory
+---
+# --- Service: ClusterIP ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-middleware-signcrypt-svc
+  namespace: pts
+spec:
+  selector:
+    app: ms-middleware-signcrypt
+  ports:
+    - port: 8442
+      targetPort: 8442
+  type: ClusterIP
+---
+# --- Ingress: HTTPS con TLS ---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ms-middleware-ingress
+  namespace: pts
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  tls:
+    - hosts:
+        - api.tu-dominio.com
+      secretName: ms-middleware-tls
+  rules:
+    - host: api.tu-dominio.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ms-middleware-signcrypt-svc
+                port:
+                  number: 8442

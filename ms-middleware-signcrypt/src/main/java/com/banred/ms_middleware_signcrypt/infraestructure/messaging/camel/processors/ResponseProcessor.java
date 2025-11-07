@@ -2,16 +2,21 @@ package com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.proce
 
 import com.banred.ms_middleware_signcrypt.common.constant.StatusResponse;
 import com.banred.ms_middleware_signcrypt.common.exception.AbstractException;
+import com.banred.ms_middleware_signcrypt.domain.apim.dto.APIMRequestDTO;
 import com.banred.ms_middleware_signcrypt.domain.apim.dto.APIMResponseDTO;
 import com.banred.ms_middleware_signcrypt.domain.apim.dto.SignatureDTO;
 import com.nimbusds.jose.shaded.gson.Gson;
+import com.nimbusds.jose.shaded.gson.JsonObject;
+import com.nimbusds.jose.shaded.gson.JsonParser;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.util.Base64;
 import java.util.Date;
 
 import static com.banred.ms_middleware_signcrypt.common.util.Utilities.getDateStringISO8601;
@@ -24,7 +29,7 @@ public class ResponseProcessor implements Processor {
     @Override
     public void process(Exchange exchange) throws ParseException {
         try {
-            // 1. Construir la respuesta inicial
+            String payloadBase64 = "";
             String responseBody = exchange.getMessage().getBody(String.class);
             String xEntityID = exchange.getIn().getHeader("X-Entity-ID", String.class);
             String xKey = exchange.getIn().getHeader("x-key", String.class);
@@ -33,6 +38,13 @@ public class ResponseProcessor implements Processor {
             String digest = exchange.getIn().getHeader("digest", String.class);
             String signature = exchange.getIn().getHeader("Signature", String.class);
 
+            if (exchange.getProperty("payload", APIMRequestDTO.class).getDirection().equals("IN")) {
+                JsonObject jsonObject = JsonParser.parseString(responseBody).getAsJsonObject();
+                String xml = jsonObject.get("data").getAsString();
+                payloadBase64 = Base64.getEncoder().encodeToString(xml.getBytes(StandardCharsets.UTF_8));
+            } else {
+                payloadBase64 = responseBody;
+            }
             SignatureDTO signatureDTO = new SignatureDTO();
             signatureDTO.setDigest(digest);
             signatureDTO.setSignature(signature);
@@ -41,7 +53,7 @@ public class ResponseProcessor implements Processor {
             APIMResponseDTO dto = new APIMResponseDTO();
             dto.setXEntityID(xEntityID);
             dto.setXKey(xKey);
-            dto.setPayload(responseBody);
+            dto.setPayload(payloadBase64);
             dto.setStatus(StatusResponse.SUCCESS.getValue());
             dto.setTimestampOut(getDateStringISO8601(new Date()));
             dto.setTimestampIn(timestampIn);
@@ -51,7 +63,6 @@ public class ResponseProcessor implements Processor {
             String requestBody = gson.toJson(dto);
             logger.debug("Respuesta preparada: {}", requestBody);
 
-            // 2. Actualizar el cuerpo del Exchange con el JSON preparado
             exchange.getMessage().setBody(requestBody);
 
         } catch (AbstractException e) {

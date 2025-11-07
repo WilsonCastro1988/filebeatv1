@@ -1,5 +1,7 @@
 package com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors;
 
+import com.banred.ms_middleware_signcrypt.common.constant.CodeResponse;
+import com.banred.ms_middleware_signcrypt.common.exception.AbstractError;
 import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Institution;
 import com.banred.ms_middleware_signcrypt.domain.institution.service.IInstitutionRedisService;
 import com.banred.ms_middleware_signcrypt.domain.jw.dto.JWSResponse;
@@ -9,11 +11,17 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.concurrent.TimeoutException;
+
+import static com.banred.ms_middleware_signcrypt.common.exception.WebExceptionFactory.mapWebClientRequestException;
 
 @Component
 public class RawApiOutProcessor implements Processor {
@@ -30,64 +38,112 @@ public class RawApiOutProcessor implements Processor {
 
     @Override
     public void process(Exchange exchange) throws Exception {
-        String payload = exchange.getIn().getBody(String.class);
-        Map<String, Object> headers = exchange.getIn().getHeaders();
-
-        // 1️⃣ Extraer xEntityID
         String xEntityID = exchange.getIn().getHeader("X-Entity-ID", String.class);
-        if (xEntityID == null || xEntityID.isEmpty()) {
-            throw new IllegalArgumentException("Header 'xEntityID' obligatorio");
-        }
-
-        // 2️⃣ Obtener institución desde Redis
+        String xOperation = exchange.getIn().getHeader("x-operation", String.class);
+        String payload = exchange.getIn().getBody(String.class);
         Institution institution = institutionRedisService.getInstitution(xEntityID);
-        if (institution == null) {
-            throw new IllegalArgumentException("Institución no encontrada para RECEIVER: " + xEntityID);
+
+        if (payload == null || payload.trim().isEmpty()) {
+            throw new AbstractError("400", "Payload no puede ser vacío", "T");
         }
 
+        if (xEntityID.isEmpty() || xOperation.isEmpty()) {
+            throw new AbstractError("400", "Header x-operation no presente", "T");
+        }
         logger.info("Procesando payload para institución: {}", institution.getId());
 
-        // 3️⃣ Firmar payload
+        // Firmar payload
         JWSResponse jwsResponse = cryptoService.signWithHeaders(payload, institution);
 
-        // 4️⃣ Encriptar payload firmado
+        // Encriptar payload firmado
         String encryptedPayload = cryptoService.encrypt(jwsResponse.getJwsCompact(), institution);
         JWEObject jweObject = JWEObject.parse(encryptedPayload);
-        String xKey = (String) jweObject.getHeader().getCustomParam("x-key"); // Asume que CryptoService lo incluye
+        String xKey = (String) jweObject.getHeader().getCustomParam("x-key");
+        String urlEnvio = "";
 
-
-        // 5️⃣ Preparar headers HTTP
         WebClient webClient = exchange.getProperty("webClient", WebClient.class);
         if (webClient == null) {
             throw new IllegalStateException("WebClient con MTLS no disponible. Asegúrate de ejecutar MtlsProcessor primero.");
         }
 
-        // 6️⃣ Preparar headers HTTP
-        WebClient.RequestBodySpec requestSpec = webClient.post()
-                .uri(institution.getEndpoint()) // endpoint dinámico desde Redis
-                //.header("Accept-Encoding", "gzip")
-                .header("X-Entity-ID", institution.getId())
-                .header("Signature", jwsResponse.getSignatureHeader())
-                .header("Signature-Input", jwsResponse.getSignatureInput())
-                .header("digest", jwsResponse.getDigestHeader())
-                .header("x-key", xKey);
+        String operacion = xOperation.trim().toUpperCase();
+        urlEnvio = institution.getEndpointUrl(operacion);
 
-        headers.forEach((k, v) -> {
-            if (!k.equalsIgnoreCase("xEntityID")) {
-                requestSpec.header(k, v.toString());
-            }
-        });
+        if (urlEnvio == null) {
+            throw new AbstractError("400", "EndPoint no Definido para operacion: " + operacion, "T");
+        }
 
-        // 7️⃣ Enviar al endpoint externo y recibir respuesta
-        Mono<String> responseMono = requestSpec.bodyValue(encryptedPayload)
-                .retrieve()
-                .bodyToMono(String.class);
+        try {
+            HttpHeaders customHeaders = buildCustomHeaders(institution, jwsResponse, xKey);
+            String jsonResponse = callExternalService(webClient, urlEnvio, encryptedPayload, customHeaders, institution.getTimeout());
+            logger.info("Respuesta recibida: {}", jsonResponse);
+            exchange.getMessage().setBody(jsonResponse);
+        } catch (AbstractError e) {
+            throw e;
+        } catch (IllegalArgumentException e) {
+            throw new AbstractError("400", e.getMessage(), "T");
+        } catch (IllegalStateException e) {
+            throw new AbstractError("500", e.getMessage(), "T");
+        } catch (Exception e) {
+            String causeMessage = (e.getCause() != null) ? e.getCause().getMessage() : "Sin causa específica";
+            throw new AbstractError("500", "Error interno: " + e.getMessage() + " - " + causeMessage, "T");
+        }
+    }
 
-        String externalResponse = responseMono.block();
 
-        logger.info("Respuesta recibida del endpoint externo: {}", externalResponse);
+    private HttpHeaders buildCustomHeaders(Institution institution, JWSResponse jwsResponse, String xKey) {
+        HttpHeaders customHeaders = new HttpHeaders();
+        customHeaders.add("X-Entity-ID", institution.getId());
+        customHeaders.add("Signature", jwsResponse.getSignatureHeader());
+        customHeaders.add("Signature-Input", jwsResponse.getSignatureInput());
+        customHeaders.add("digest", jwsResponse.getDigestHeader());
+        customHeaders.add("x-key", xKey);
 
-        // 8️⃣ Devolver la respuesta al flujo Camel
-        exchange.getMessage().setBody(externalResponse);
+        return customHeaders;
+    }
+
+    private String callExternalService(WebClient webClient, String urlEnvio, String encryptedPayload,
+                                       HttpHeaders customHeaders, int timeoutSeconds) {
+
+        try {
+            return webClient
+                    .post()
+                    .uri(urlEnvio)
+                    .headers(httpHeaders -> httpHeaders.addAll(customHeaders))
+                    .bodyValue(encryptedPayload)
+                    .acceptCharset(StandardCharsets.UTF_8)
+                    .retrieve()
+                    .onStatus(
+                            httpStatus -> httpStatus.is4xxClientError() || httpStatus.is5xxServerError(),
+                            response -> response.bodyToMono(String.class)
+                                    .map(errorBody -> new AbstractError(
+                                            String.valueOf(response.statusCode().value()),
+                                            "Error del servicio: " + errorBody,
+                                            "T"
+                                    ))
+                    )
+                    .bodyToMono(String.class)
+                    .timeout(Duration.ofSeconds(timeoutSeconds))
+                    .onErrorMap(TimeoutException.class, ex -> {
+                        logger.error("Timeout detectado: {}", ex.getMessage());
+                        return new AbstractError(HttpStatus.REQUEST_TIMEOUT.value(),
+                                CodeResponse.TIMEOUTFB.getValue(),
+                                "Timeout al conectar con el servicio externo", "T");
+                    })
+                    .onErrorMap(WebClientRequestException.class, ex -> {
+                        logger.error("Error de conectividad detectado: {}", ex.getMessage());
+                        return mapWebClientRequestException(ex, urlEnvio);
+                    })
+                    .doOnError(AbstractError.class, ex ->
+                            logger.error("AbstractError propagándose correctamente: {}", ex.getMessage())
+                    )
+                    .blockOptional(Duration.ofSeconds(5L + timeoutSeconds))
+                    .orElseThrow(() -> new AbstractError("500", "Respuesta vacía del servicio externo", "T"));
+
+        } catch (AbstractError e) {
+            throw e;
+        } catch (Exception e) {
+            throw new AbstractError(e, "T");
+        }
     }
 }

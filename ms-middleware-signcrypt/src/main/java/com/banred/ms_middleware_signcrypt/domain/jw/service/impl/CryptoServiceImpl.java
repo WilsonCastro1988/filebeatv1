@@ -18,6 +18,7 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -40,7 +41,8 @@ import static com.banred.ms_middleware_signcrypt.common.util.Utilities.toPublicK
 public class CryptoServiceImpl implements CryptoService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CryptoServiceImpl.class);
-    private static final long MAX_AGE_SECONDS = 300; // 5 minutos
+    @Value("${microservice.parameters.EXPIRY_SECONDS}")
+    private long expirySeconds;
 
     // ============================================================
     // 🏷️ CÓDIGOS DE ERROR ESPECÍFICOS PARA CRIPTOGRAFÍA
@@ -177,26 +179,28 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     // ============================================================
-    // 🧠 LÓGICA AVANZADA: FIRMAR Y VERIFICAR CON METADATOS
+    // 🧠 FIRMAR Y VERIFICAR CON METADATOS
     // ============================================================
 
     public JWSResponse signWithHeaders(String payload, Institution institution) throws AbstractException {
         try {
+            // Calcula digest sobre tu XML real
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             String digestBase64 = Base64.getEncoder().encodeToString(digest.digest(payload.getBytes(StandardCharsets.UTF_8)));
             String digestHeader = "SHA-256=" + digestBase64;
 
+            // Crea headers de firma (si los necesitas)
             long created = Instant.now().getEpochSecond();
-            long expires = created + MAX_AGE_SECONDS;
-
+            long expires = created + expirySeconds;
             String signatureInput = String.format(
                     "sig1=('digest');created=%d;keyid='%s';alg='rsa-sha256';expires=%d",
                     created, institution.getId(), expires
             );
 
-            String toSign = digestHeader + "\n" + signatureInput;
-            String jwsCompact = this.sign(toSign, institution.getJws());
+            // Firma el payload real (XML) directamente
+            String jwsCompact = this.sign(payload, institution.getJws());
 
+            // Extrae la firma del JWS para enviarla en headers
             JWSObject jwsObject = JWSObject.parse(jwsCompact);
             String signature = Base64.getEncoder().encodeToString(jwsObject.getSignature().decode());
             String signatureHeader = "sig1=" + signature;
@@ -210,33 +214,39 @@ public class CryptoServiceImpl implements CryptoService {
         }
     }
 
+
     public void verifyWithHeaders(String jwsCompact, String digestHeader, String signatureInput, Institution institution) throws AbstractException {
         validateTimestamps(signatureInput);
         validateKeyId(signatureInput, institution.getId());
 
         try {
             JWSObject jwsObject = JWSObject.parse(jwsCompact);
-            String signedContent = jwsObject.getPayload().toString();
+            String signedPayload = jwsObject.getPayload().toString(); // esto es tu XML
 
-            String digestFromJws = signedContent.split("\n")[0].trim();
-            if (!digestFromJws.equals(digestHeader)) {
-                throw new SecurityException("Digest inválido: el digest firmado no coincide con el recibido.");
+            // calcular digest sobre el payload real
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            String calculatedDigest = Base64.getEncoder().encodeToString(digest.digest(signedPayload.getBytes(StandardCharsets.UTF_8)));
+            String expectedDigestHeader = "SHA-256=" + calculatedDigest;
+
+            if (!expectedDigestHeader.equals(digestHeader)) {
+                throw new SecurityException("Digest inválido: el digest calculado no coincide con el recibido.");
             }
 
+            // verificar la firma JWS
             if (!this.verify(jwsCompact, institution.getJws())) {
                 throw new SecurityException("Firma JWS inválida.");
             }
 
             LOGGER.info("✅ Firma JWS verificada correctamente para institución {}", institution.getId());
 
-        } catch (ParseException e) {
-            throw createCryptoException(e, JWS_VERIFY_ERROR, "parseo de JWS durante verificación con headers", institution.getId());
+        } catch (ParseException | NoSuchAlgorithmException e) {
+            throw createCryptoException(e, JWS_VERIFY_ERROR, "error durante verificación JWS", institution.getId());
         }
-        // SecurityException se deja propagar, ya que es un error de negocio, no técnico.
     }
 
+
     // ============================================================
-    // 🔍 MÉTODOS AUXILIARES (Sin cambios)
+    // 🔍 MÉTODOS AUXILIARES
     // ============================================================
 
     private void validateTimestamps(String signatureInput) {
@@ -247,7 +257,7 @@ public class CryptoServiceImpl implements CryptoService {
         if (now < created || now > expires) {
             throw new SecurityException("Firma expirada o no válida (fuera de la ventana de tiempo).");
         }
-        if (expires - created > MAX_AGE_SECONDS) {
+        if (expires - created > expirySeconds) {
             throw new SecurityException("La validez de la firma excede el tiempo máximo permitido.");
         }
     }

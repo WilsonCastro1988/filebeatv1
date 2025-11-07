@@ -4,6 +4,6 @@ import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Instituti
 import org.springframework.web.reactive.function.client.WebClient;
 
 public interface WebClientService {
-    WebClient createWebClient(Institution institution);
+    WebClient createWebClient(Institution institution) ;
 
 }

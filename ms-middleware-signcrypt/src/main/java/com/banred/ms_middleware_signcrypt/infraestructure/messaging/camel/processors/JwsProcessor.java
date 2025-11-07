@@ -32,16 +32,16 @@ public class JwsProcessor implements Processor {
         logger.info("🔏 Aplicando JWS para institución {}", institution.getId());
 
         try {
-            // 🔹 Firma y genera todos los encabezados en un solo paso
+            // Firma y genera todos los encabezados en un solo paso
             JWSResponse jwsResponse = cryptoService.signWithHeaders(payload, institution);
 
-            // 🔹 Asignar headers al Exchange
+            // Asignar headers al Exchange
             exchange.getIn().setHeader("digest", jwsResponse.getDigestHeader());
             exchange.getIn().setHeader("Signature-Input", jwsResponse.getSignatureInput());
             exchange.getIn().setHeader("Signature", jwsResponse.getSignatureHeader());
             exchange.getIn().setHeader("X-Entity-ID", institution.getId());
 
-            // 🔹 Colocar el cuerpo firmado
+            // Colocar el cuerpo firmado
             exchange.getMessage().setBody(jwsResponse.getJwsCompact());
             exchange.setProperty("jwsResponse", jwsResponse.getJwsCompact());
 

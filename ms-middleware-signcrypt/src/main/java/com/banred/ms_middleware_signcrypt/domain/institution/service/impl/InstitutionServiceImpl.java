@@ -1,7 +1,6 @@
 package com.banred.ms_middleware_signcrypt.domain.institution.service.impl;
 
 import com.banred.ms_middleware_signcrypt.common.exception.AbstractError;
-import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Institution;
 import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Institutions;
 import com.banred.ms_middleware_signcrypt.domain.institution.service.IInstitutionRedisService;
 import com.banred.ms_middleware_signcrypt.domain.institution.service.IInstitutionService;
@@ -45,10 +44,4 @@ public class InstitutionServiceImpl implements IInstitutionService {
     public Institutions getInstitutions() {
         return institutions;
     }
-
-    @Override
-    public Institution getInstitutionById(String id) {
-        return null;
-    }
-
 }

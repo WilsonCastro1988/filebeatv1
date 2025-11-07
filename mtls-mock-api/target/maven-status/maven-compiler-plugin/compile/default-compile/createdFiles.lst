@@ -1,0 +1,8 @@
+com\banred\mtlsmock\config\RedisConfig.class
+com\banred\mtlsmock\config\SecurityConfig.class
+com\banred\mtlsmock\controller\SecureMockController.class
+com\banred\mtlsmock\service\RedisUserDetailsService.class
+com\banred\mtlsmock\filter\MtlsAndBasicAuthFilter.class
+com\banred\mtlsmock\MtlsMockApplication.class
+com\banred\mtlsmock\model\UserRecord.class
+com\banred\mtlsmock\init\RedisInit.class

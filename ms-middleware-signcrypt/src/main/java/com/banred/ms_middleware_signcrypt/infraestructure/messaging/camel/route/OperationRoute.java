@@ -1,6 +1,6 @@
 package com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.route;
 
-import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.InstitutionLookupProcessor;
+import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.*;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 

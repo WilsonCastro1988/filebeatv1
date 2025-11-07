@@ -1,0 +1,22 @@
+services:
+  redis:
+    image: redis:7.0
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - redis-data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - signcrypt-network
+    restart: unless-stopped
+
+
+volumes:
+  redis-data:
+    driver: local
+
+networks:
+  signcrypt-network:
+    driver: bridge

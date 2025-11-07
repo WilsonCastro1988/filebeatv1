@@ -4,35 +4,48 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
 import lombok.Getter;
 import lombok.Setter;
 
-@XmlAccessorType(XmlAccessType.FIELD)
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Getter
 @Setter
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Institution {
-    @XmlAttribute(name="id")
+
+    @XmlAttribute(name = "id")
     private String id;
 
-    @XmlElement(name="name")
+    @XmlElement(name = "name")
     private String name;
 
-    @XmlElement(name="tls")
-    private boolean  tls;
+    @XmlElement(name = "tls")
+    private boolean tls;
 
-    @XmlElement(name="timeout")
+    @XmlElement(name = "timeout")
     private int timeout;
 
-    @XmlElement(name="endpoint")
-    private String endpoint;
+    @XmlElementWrapper(name = "endpoints")
+    @XmlElement(name = "endpoint")
+    private List<Endpoint> endpoints;
 
-    @XmlElement(name="mtls")
+    @XmlElement(name = "mtls")
     private SecurityConfig mtls;
 
-    @XmlElement(name="jws")
+    @XmlElement(name = "jws")
     private SecurityConfig jws;
 
-    @XmlElement(name="jwe")
+    @XmlElement(name = "jwe")
     private SecurityConfig jwe;
 
+    public String getEndpointUrl(String tipoOperacion) {
+        if (endpoints == null) return null;
+        Map<String, String> map = endpoints.stream()
+                .collect(Collectors.toMap(Endpoint::getTipo, Endpoint::getUrl));
+        return map.get(tipoOperacion);
+    }
 }

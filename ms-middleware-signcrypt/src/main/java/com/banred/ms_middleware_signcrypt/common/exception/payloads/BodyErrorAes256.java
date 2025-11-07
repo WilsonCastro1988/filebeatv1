@@ -1,8 +1,13 @@
 package com.banred.ms_middleware_signcrypt.common.exception.payloads;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+@Setter
+@Getter
 public class BodyErrorAes256 implements IBodyError {
     private String tipo;
     private String fecha;
@@ -56,59 +61,4 @@ public class BodyErrorAes256 implements IBodyError {
         this.calcularFecha();
     }
 
-    public String getCodigo() {
-        return this.codigo;
-    }
-
-    public String getCodigoErrorExterno() {
-        return this.codigoErrorExterno;
-    }
-
-    public String getDetalle() {
-        return this.detalle;
-    }
-
-    public String getFecha() {
-        return this.fecha;
-    }
-
-    public String getMensaje() {
-        return this.mensaje;
-    }
-
-    public String getOrigen() {
-        return this.origen;
-    }
-
-    public String getTipo() {
-        return this.tipo;
-    }
-
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
-
-    public void setCodigoErrorExterno(String codigoErrorExterno) {
-        this.codigoErrorExterno = codigoErrorExterno;
-    }
-
-    public void setDetalle(String detalle) {
-        this.detalle = detalle;
-    }
-
-    public void setFecha(String fecha) {
-        this.fecha = fecha;
-    }
-
-    public void setMensaje(String mensaje) {
-        this.mensaje = mensaje;
-    }
-
-    public void setOrigen(String origen) {
-        this.origen = origen;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
 }

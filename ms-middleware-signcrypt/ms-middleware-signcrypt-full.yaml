@@ -1,0 +1,155 @@
+# --- Namespace ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pts
+
+---
+
+# --- PersistentVolume ---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-ms-middleware-signcrypt
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  hostPath:
+    path: /host_mnt/c/home/devopsa/microservicios/ms-middleware-signcrypt/logs
+    type: DirectoryOrCreate
+
+---
+
+# --- PersistentVolumeClaim ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-ms-middleware-signcrypt
+  namespace: pts
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: standard
+
+---
+
+# --- Service ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-middleware-signcrypt-svc
+  namespace: pts
+  labels:
+    app: ms-middleware-signcrypt
+spec:
+  type: NodePort
+  ports:
+    - name: ms-middleware-signcrypt
+      port: 8442
+      nodePort: 30026
+  selector:
+    app: ms-middleware-signcrypt
+
+---
+
+# --- Deployment ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-middleware-signcrypt
+  namespace: pts
+  labels:
+    app: ms-middleware-signcrypt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-middleware-signcrypt
+  template:
+    metadata:
+      labels:
+        app: ms-middleware-signcrypt
+    spec:
+      containers:
+        - name: ms-middleware-signcrypt
+          image: ms-middleware-signcrypt-ms-middleware-signcrypt:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8442
+          env:
+            - name: SERVER_PORT
+              value: "8442"
+            - name: SERVER_ADDRESS
+              value: "0.0.0.0"
+            - name: REDIS_HOSTNAME
+              value: "redis"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_USERNAME
+              value: "admin"
+            - name: REDIS_PASSWORD
+              value: "Passw0rd"
+            - name: RUTA_CONFIG_XML
+              value: "/etc/tls/config-service.xml"
+            - name: RUTA_CRL
+              value: "/etc/tls/certs/ca/crl/crl.der"
+            - name: RUTA_RSA
+              value: "/etc/tls/rsa-keys"
+            - name: EXPIRY_SECONDS
+              value: "300"
+            - name: SPRING_JACKSON_DEFAULT_PROPERTY_INCLUSION
+              value: "non-null"
+            - name: SPRING_JACKSON_TIME_ZONE
+              value: "GMT-5"
+            - name: LOGGING_FILE_NAME
+              value: "/etc/logs/app.log"
+            - name: LOGGING_LOGBACK_ROLLINGPOLICY_FILE_NAME_PATTERN
+              value: "/etc/logs/app.%d{yyyy-MM-dd}.log"
+            - name: LOGGING_LOGBACK_ROLLINGPOLICY_MAX_HISTORY
+              value: "7"
+            - name: LOGGING_LOGBACK_ROLLINGPOLICY_TOTAL_SIZE_CAP
+              value: "1GB"
+            - name: LOGGING_LEVEL_ROOT
+              value: "DEBUG"
+            - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB
+              value: "DEBUG"
+            - name: LOGGING_LEVEL_COM_BANRED
+              value: "DEBUG"
+            - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY
+              value: "DEBUG"
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Djavax.net.debug=ssl:handshake:verbose -Dreactor.netty.log.level=DEBUG"
+          volumeMounts:
+            - name: logs-volume
+              mountPath: /etc/logs
+            - name: config-service
+              mountPath: /etc/tls/config-service.xml
+              subPath: config-service.xml
+            - name: crl-volume
+              mountPath: /etc/tls/certs/ca/crl/crl.der
+              subPath: crl.der
+            - name: rsa-keys
+              mountPath: /etc/tls/rsa-keys
+      volumes:
+        - name: logs-volume
+          persistentVolumeClaim:
+            claimName: pvc-ms-middleware-signcrypt
+        - name: config-service
+          hostPath:
+            path: /host_mnt/c/home/devopsa/microservicios/ms-middleware-signcrypt/config-service.xml
+            type: File
+        - name: crl-volume
+          hostPath:
+            path: /host_mnt/c/home/devopsa/microservicios/certs/ca/crl/crl.der
+            type: File
+        - name: rsa-keys
+          hostPath:
+            path: /host_mnt/c/home/devopsa/microservicios/rsa-keys
+            type: Directory
+

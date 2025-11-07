@@ -35,8 +35,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleAbstractException(AbstractException ex) {
         Map<String, Object> errorBody = new HashMap<>();
         errorBody.put("status", ex.getCodigoHttp());
-        errorBody.put("error", ex.getMessage());
-        errorBody.put("error_description", ex.getTipo());
+        errorBody.put("error", ex.getCodigoError());
+        errorBody.put("error_description", ex.getMessage());
         return ResponseEntity.status(ex.getCodigoHttp()).body(errorBody);
     }
 

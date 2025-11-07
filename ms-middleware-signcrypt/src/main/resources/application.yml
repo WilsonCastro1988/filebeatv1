@@ -20,7 +20,7 @@ jasypt:
       - org.springframework.boot.ansi.AnsiPropertySource
 
 server:
-  port: ${SERVER_PORT:8442}
+  port: ${SERVER_PORT}
   servlet:
     context-path: /api
   compression:
@@ -30,7 +30,7 @@ server:
     include-binding-errors: always
     include-stacktrace: never
     include-exception: false
-  address: 0.0.0.0
+  address: ${SERVER_ADDRESS}
   undertow:
     threads:
       io: 10
@@ -91,3 +91,25 @@ microservice:
     RUTA_CRL: ${RUTA_CRL}
     RUTA_RSA: ${RUTA_CRL}
     EXPIRY_SECONDS: ${EXPIRY_SECONDS}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  health:
+    show-details: always
+    probes:
+      enabled: true
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+
+mtls:
+  certs:
+    valid: false
+  ocsp:
+    enabled: false
+    soft-fail: true
+    timeout: 5000

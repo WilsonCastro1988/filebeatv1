@@ -1,0 +1,268 @@
+# --- Namespace ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pts
+---
+# --- ConfigMap: config-service.xml ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-service
+  namespace: pts
+data:
+  config-service.xml: |
+    <Institutions>
+      <Institution id="cliente-valid">
+        <name>Banco TEST Valido</name>
+        <tls>true</tls>
+        <timeout>15000</timeout>
+        <endpoint>https://localhost:8443/api/secure/mtls</endpoint>
+        <mtls enable="true">
+          <keystore>C:/etc/tls/certs/clients/client-valid-keystore.p12</keystore>
+          <truststore>C:/etc/tls/certs/clients/client-valid-truststore.p12</truststore>
+          <keystorePassword>clientpass</keystorePassword>
+          <truststorePassword>clientpass</truststorePassword>
+        </mtls>
+        <jws enable="true">
+          <keystore>C:/etc/tls/rsa-keys/PRIVATEIN0002.pem</keystore>
+          <truststore>C:/etc/tls/rsa-keys/PUBLICIN0002.pem</truststore>
+          <keystorePassword>clientpass</keystorePassword>
+          <truststorePassword>clientpass</truststorePassword>
+        </jws>
+        <jwe enable="true">
+          <keystore>C:/etc/tls/rsa-keys/PRIVATEIN0002.pem</keystore>
+          <truststore>C:/etc/tls/rsa-keys/PUBLICIN0002.pem</truststore>
+          <keystorePassword>clientpass</keystorePassword>
+          <truststorePassword>clientpass</truststorePassword>
+        </jwe>
+      </Institution>
+    </Institutions>
+---
+# --- ConfigMap: crl.der (vacío) ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crl-volume
+  namespace: pts
+data:
+  crl.der: ""
+---
+# --- ConfigMap: redis-acl ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-acl
+  namespace: pts
+data:
+  users.acl: |
+    user admin on >Passw0rd ~* +@all
+    user default off
+
+---
+# --- Redis Deployment ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: pts
+  labels:
+    app: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7
+          ports:
+            - containerPort: 6379
+          command:
+            - "redis-server"
+            - "--aclfile"
+            - "/usr/local/etc/redis/users.acl"
+          volumeMounts:
+            - name: acl-config
+              mountPath: /usr/local/etc/redis/users.acl
+              subPath: users.acl
+      volumes:
+        - name: acl-config
+          configMap:
+            name: redis-acl
+---
+# --- Redis Service ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: pts
+spec:
+  selector:
+    app: redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+---
+# --- Deployment: ms-middleware-signcrypt ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-middleware-signcrypt
+  namespace: pts
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-middleware-signcrypt
+  template:
+    metadata:
+      labels:
+        app: ms-middleware-signcrypt
+    spec:
+      containers:
+        - name: ms-middleware-signcrypt
+          image: ms-middleware-signcrypt-ms-middleware-signcrypt:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8442
+          env:
+            - name: SERVER_PORT
+              value: "8442"
+            - name: SERVER_ADDRESS
+              value: "0.0.0.0"
+            - name: REDIS_HOSTNAME
+              value: "redis"  # ← Apunta al Service
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_USERNAME
+              value: "admin"
+            - name: REDIS_PASSWORD
+              value: "Passw0rd"  # ← Coincide con redis-server
+            - name: RUTA_CONFIG_XML
+              value: "/etc/tls/config-service.xml"
+            - name: RUTA_CRL
+              value: "/etc/tls/certs/ca/crl/crl.der"
+            - name: RUTA_RSA
+              value: "/etc/tls/rsa-keys"
+            - name: EXPIRY_SECONDS
+              value: "300"
+            - name: SPRING_JACKSON_DEFAULT_PROPERTY_INCLUSION
+              value: "non-null"
+            - name: SPRING_JACKSON_TIME_ZONE
+              value: "GMT-5"
+            - name: LOGGING_FILE_NAME
+              value: "/etc/logs/app.log"
+            - name: LOGGING_LOGBACK_ROLLINGPOLICY_FILE_NAME_PATTERN
+              value: "/etc/logs/app.%d{yyyy-MM-dd}.log"
+            - name: LOGGING_LOGBACK_ROLLINGPOLICY_MAX_HISTORY
+              value: "7"
+            - name: LOGGING_LOGBACK_ROLLINGPOLICY_TOTAL_SIZE_CAP
+              value: "1GB"
+            - name: LOGGING_LEVEL_ROOT
+              value: "DEBUG"
+            - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB
+              value: "DEBUG"
+            - name: LOGGING_LEVEL_COM_BANRED
+              value: "DEBUG"
+            - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY
+              value: "DEBUG"
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Djavax.net.debug=ssl:handshake:verbose -Dreactor.netty.log.level=DEBUG"
+          volumeMounts:
+            - name: logs
+              mountPath: /etc/logs
+            - name: config-service
+              mountPath: /etc/tls/config-service.xml
+              subPath: config-service.xml
+            - name: crl-volume
+              mountPath: /etc/tls/certs/ca/crl/crl.der
+              subPath: crl.der
+            - name: rsa-keys
+              mountPath: /etc/tls/rsa-keys
+      volumes:
+        - name: logs
+          emptyDir: {}
+        - name: config-service
+          configMap:
+            name: config-service
+        - name: crl-volume
+          configMap:
+            name: crl-volume
+        - name: rsa-keys
+          emptyDir: {}
+---
+# --- Filebeat ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filebeat
+  namespace: pts
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: filebeat
+  template:
+    metadata:
+      labels:
+        app: filebeat
+    spec:
+      containers:
+        - name: filebeat
+          image: docker.elastic.co/beats/filebeat:8.15.0
+          command: ["filebeat", "-e", "-strict.perms=false"]
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs
+            - name: filebeat-config
+              mountPath: /usr/share/filebeat/filebeat.yml
+              subPath: filebeat.yml
+      volumes:
+        - name: logs
+          emptyDir: {}
+        - name: filebeat-config
+          configMap:
+            name: filebeat-config
+---
+# --- ConfigMap: filebeat.yml ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-config
+  namespace: pts
+data:
+  filebeat.yml: |
+    filebeat.inputs:
+      - type: log
+        enabled: true
+        paths:
+          - /app/logs/app.log
+          - /app/logs/app.*.log
+    output.console:
+      pretty: true
+    logging.level: info
+
+---
+# --- Service: ms-middleware-signcrypt-svc ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-middleware-signcrypt-svc
+  namespace: pts
+  labels:
+    app: ms-middleware-signcrypt
+spec:
+  type: NodePort
+  ports:
+    - port: 8442
+      targetPort: 8442
+      nodePort: 30026
+      protocol: TCP
+  selector:
+    app: ms-middleware-signcrypt

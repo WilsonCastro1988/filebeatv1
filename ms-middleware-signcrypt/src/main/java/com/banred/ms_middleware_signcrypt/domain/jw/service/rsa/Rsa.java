@@ -53,8 +53,7 @@ public class Rsa implements IRsa {
 
             byte[] encrypted = cipher.doFinal(textoEnClaro.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(encrypted);
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException | InvalidKeyException |
-                 IllegalBlockSizeException | BadPaddingException e) {
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
             throw new AbstractError(e, "RSA.cifrar");
         }
     }
@@ -74,8 +73,7 @@ public class Rsa implements IRsa {
 
             byte[] decrypted = cipher.doFinal(Base64.getDecoder().decode(textoCifrado));
             return new String(decrypted, StandardCharsets.UTF_8);
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException | InvalidKeyException |
-                 IllegalBlockSizeException | BadPaddingException e) {
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
             throw new AbstractError(e, "RSA.descifrar");
         }
     }
@@ -107,7 +105,7 @@ public class Rsa implements IRsa {
             String publicKeyPEM = new String(Files.readAllBytes(Paths.get(path)))
                     .replace("-----BEGIN PUBLIC KEY-----", "")
                     .replace("-----END PUBLIC KEY-----", "")
-                    .replaceAll("\s+", "")
+                    .replaceAll("\\s+", "")
                     .replaceAll(System.lineSeparator(), "");
             byte[] keyBytes = Base64.getDecoder().decode(publicKeyPEM);
 

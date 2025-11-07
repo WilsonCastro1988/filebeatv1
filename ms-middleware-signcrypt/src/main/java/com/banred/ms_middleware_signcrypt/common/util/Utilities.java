@@ -2,6 +2,7 @@ package com.banred.ms_middleware_signcrypt.common.util;
 
 import com.banred.ms_middleware_signcrypt.domain.apim.dto.APIMRequestDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JWSObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -17,7 +18,6 @@ import java.util.*;
 
 public class Utilities {
 
-    // Private constructor to prevent instantiation
     private Utilities() {
         throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
@@ -74,6 +74,15 @@ public class Utilities {
         }
 
         return headerMap;
+    }
+
+    public static String extractPayload(String jwsCompact) {
+        try {
+            JWSObject jwsObject = JWSObject.parse(jwsCompact);
+            return jwsObject.getPayload().toString();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("No se pudo extraer el payload del JWS", e);
+        }
     }
 
 }

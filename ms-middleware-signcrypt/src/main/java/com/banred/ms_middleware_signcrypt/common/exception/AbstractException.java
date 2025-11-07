@@ -1,8 +1,11 @@
 package com.banred.ms_middleware_signcrypt.common.exception;
 
 
+import java.io.Serial;
+
 public abstract class AbstractException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = -8132295132825609981L;
 
     AbstractException() {
@@ -27,4 +30,5 @@ public abstract class AbstractException extends RuntimeException {
     public abstract int getCodigoHttp();
 
     public abstract String getTipo();
+    public abstract String getCodigoError();
 }

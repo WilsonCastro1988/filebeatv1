@@ -2,7 +2,6 @@ package com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.route
 
 import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.JweProcessor;
 import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.JwsProcessor;
-import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.MtlsProcessor;
 import com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.processors.ResponseProcessor;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
@@ -10,14 +9,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class OperationOUTRoute extends RouteBuilder {
 
-    private final MtlsProcessor mtlsRequestProcessor;
     private final ResponseProcessor responseProcessor;
     private final JwsProcessor jwsProcessor;
     private final JweProcessor jweProcessor;
 
-    public OperationOUTRoute(MtlsProcessor mtlsRequestProcessor, ResponseProcessor responseProcessor,
+    public OperationOUTRoute(ResponseProcessor responseProcessor,
                              JwsProcessor jwsProcessor, JweProcessor jweProcessor) {
-        this.mtlsRequestProcessor = mtlsRequestProcessor;
         this.responseProcessor = responseProcessor;
         this.jwsProcessor = jwsProcessor;
         this.jweProcessor = jweProcessor;
@@ -29,10 +26,6 @@ public class OperationOUTRoute extends RouteBuilder {
         from("direct:operation_out_flow")
                 .routeId("operation_out_flow")
                 .log("➡️ Dirección OUT detectada")
-                .choice()
-                .when(simple("${exchangeProperty.institution.mtls.enable} == true"))
-                .process(mtlsRequestProcessor)
-                .end()
                 .choice()
                 .when(simple("${exchangeProperty.institution.jws.enable} == true"))
                 .process(jwsProcessor) // firma

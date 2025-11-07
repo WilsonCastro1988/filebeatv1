@@ -30,7 +30,7 @@ public class Aes256 implements IAes256 {
     
 
     public Aes256() {
-        // Default constructor intentionally left empty as no initialization is required.
+        // Default constructor.
     }
 
     public String cifrar(String plaintext, String base64Key) {

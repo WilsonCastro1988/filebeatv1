@@ -3,13 +3,13 @@ package com.banred.ms_middleware_signcrypt.infraestructure.messaging.camel.proce
 import com.banred.ms_middleware_signcrypt.domain.apim.dto.APIMRequestDTO;
 import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Institution;
 import com.banred.ms_middleware_signcrypt.domain.jw.service.CryptoService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import static com.banred.ms_middleware_signcrypt.common.util.Utilities.jsonToDtoConverter;
 
 @Component
 public class JweDecryptProcessor implements Processor {
@@ -43,19 +43,11 @@ public class JweDecryptProcessor implements Processor {
             String jwsCompact = cryptoService.decrypt(obj.getData(), institution);
             logger.info("📤 Datos descifrados: {}", jwsCompact);
 
+            exchange.setProperty("payloadDto", obj);
             exchange.setProperty("jwsCompact", jwsCompact);
             exchange.getMessage().setBody(jwsCompact);
         } else {
             logger.debug("JWE no habilitado para institución {}", institution.getId());
-        }
-    }
-
-    public static APIMRequestDTO jsonToDtoConverter(String jsonObject) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.readValue(jsonObject, APIMRequestDTO.class);
-        } catch (JsonProcessingException e) {
-            return null;
         }
     }
 }

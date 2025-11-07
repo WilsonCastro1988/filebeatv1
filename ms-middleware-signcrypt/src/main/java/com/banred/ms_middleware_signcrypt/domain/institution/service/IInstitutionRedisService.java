@@ -5,6 +5,6 @@ import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Instituti
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 public interface IInstitutionRedisService {
-    public void saveInstitutions(Institutions institutions);
-    public Institution getInstitution(String id) throws JsonProcessingException;
+    void saveInstitutions(Institutions institutions);
+    Institution getInstitution(String id) throws JsonProcessingException;
 }

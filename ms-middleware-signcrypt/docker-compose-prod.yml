@@ -3,106 +3,43 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    #image: ocr.harborqa.banred.fin/microservices/ms-middleware-signcrypt:1.0.0-DEV
     container_name: ms-middleware-signcrypt
+    restart: always
     ports:
       - "8442:8442"
     environment:
       - SERVER_PORT=8442
-      - REDIS_HOSTNAME=redis
+      - SERVER_ADDRESS=0.0.0.0
+      - REDIS_HOSTNAME=192.168.100.228
       - REDIS_PORT=6379
+      - REDIS_USERNAME=admin
       - REDIS_PASSWORD=Passw0rd
+      # Ajustamos rutas internas
       - RUTA_CONFIG_XML=/etc/tls/config-service.xml
       - RUTA_CRL=/etc/tls/certs/ca/crl/crl.der
       - RUTA_RSA=/etc/tls/rsa-keys
       - EXPIRY_SECONDS=300
       - SPRING_JACKSON_DEFAULT_PROPERTY_INCLUSION=non-null
       - SPRING_JACKSON_TIME_ZONE=GMT-5
-      - LOGGING_FILE_NAME=/logs/app.log
-      - LOGGING_LOGBACK_ROLLINGPOLICY_FILE_NAME_PATTERN=/logs/app.%d{yyyy-MM-dd}.log
+      - LOGGING_FILE_NAME=/etc/logs/app.log
+      - LOGGING_LOGBACK_ROLLINGPOLICY_FILE_NAME_PATTERN=/etc/logs/app.%d{yyyy-MM-dd}.log
       - LOGGING_LOGBACK_ROLLINGPOLICY_MAX_HISTORY=7
       - LOGGING_LOGBACK_ROLLINGPOLICY_TOTAL_SIZE_CAP=1GB
       - LOGGING_LEVEL_ROOT=DEBUG
       - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB=DEBUG
       - LOGGING_LEVEL_COM_BANRED=DEBUG
       - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY=DEBUG
-      - CAMEL_COMPONENT_ELASTICSEARCH_HOSTADDRESSES=elasticsearch:9200
       - JAVA_TOOL_OPTIONS=-Djavax.net.debug=ssl:handshake:verbose -Dreactor.netty.log.level=DEBUG
     volumes:
-      - /C/etc/logs:/logs
-      - /C/etc/tls/config-service.xml:/etc/tls/config-service.xml
-      - /C/etc/tls/certs/ca/crl/crl.der:/etc/tls/certs/ca/crl/crl.der
-      - /C/etc/tls/rsa-keys:/etc/tls/rsa-keys
-    depends_on:
-      - redis
-      - elasticsearch
+      - /c/home/devopsa/microservicios/ms-middleware-signcrypt/logs:/etc/logs
+      - /c/home/devopsa/microservicios/ms-middleware-signcrypt/config-service.xml:/etc/tls/config-service.xml
+      - /c/home/devopsa/microservicios/certs/ca/crl/crl.der:/etc/tls/certs/ca/crl/crl.der
+      - /c/home/devopsa/microservicios/rsa-keys:/etc/tls/rsa-keys
+      - /c/home/devopsa/microservicios/certs/clients:/etc/tls/certs/clients
+      - /c/home/devopsa/microservicios/certs/ca/ca.crt:/etc/tls/certs/ca/ca.crt
     networks:
       - signcrypt-network
-    restart: unless-stopped
-
-  redis:
-    image: redis:7.0
-    container_name: redis
-    ports:
-      - "6379:6379"
-    command: redis-server /usr/local/etc/redis/redis.conf
-    volumes:
-      - redis-data:/data
-      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
-    networks:
-      - signcrypt-network
-    restart: unless-stopped
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
-    container_name: elasticsearch
-    environment:
-      - cluster.name=docker-cluster
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    volumes:
-      - es-data:/usr/share/elasticsearch/data
-    networks:
-      - signcrypt-network
-    restart: unless-stopped
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.15.0
-    container_name: kibana
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-      - xpack.security.enabled=false
-    ports:
-      - "5601:5601"
-    depends_on:
-      - elasticsearch
-    networks:
-      - signcrypt-network
-    restart: unless-stopped
-
-  filebeat:
-    image: docker.elastic.co/beats/filebeat:8.15.0
-    container_name: filebeat
-    user: root
-    entrypoint: "filebeat -e -strict.perms=false"
-    volumes:
-      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - /C/etc/logs:/logs:ro
-    depends_on:
-      - elasticsearch
-      - ms-middleware-signcrypt
-    networks:
-      - signcrypt-network
-    restart: unless-stopped
-
-volumes:
-  redis-data:
-    driver: local
-  es-data:
-    driver: local
 
 networks:
   signcrypt-network:

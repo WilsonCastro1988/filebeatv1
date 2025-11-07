@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filebeat
+  namespace: pts
+  labels:
+    app: filebeat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: filebeat
+  template:
+    metadata:
+      labels:
+        app: filebeat
+    spec:
+      containers:
+        - name: filebeat
+          image: docker.elastic.co/beats/filebeat:8.15.0
+          imagePullPolicy: Always
+          command: ["filebeat", "-e", "-strict.perms=false"]
+          volumeMounts:
+            - name: filebeat-config
+              mountPath: /usr/share/filebeat/filebeat.yml
+              subPath: filebeat.yml
+            - name: logs-volume
+              mountPath: /app/logs
+          securityContext:
+            runAsUser: 0   # corre como root
+      volumes:
+        - name: filebeat-config
+          hostPath:
+            path: /host_mnt/c/home/devopsa/microservicios/filebeat.yml
+            type: File
+        - name: logs-volume
+          persistentVolumeClaim:
+            claimName: pvc-ms-middleware-signcrypt

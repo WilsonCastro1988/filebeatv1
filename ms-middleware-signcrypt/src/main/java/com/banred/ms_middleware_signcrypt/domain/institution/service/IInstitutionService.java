@@ -5,8 +5,6 @@ import com.banred.ms_middleware_signcrypt.domain.institution.model.dto.Instituti
 
 public interface IInstitutionService {
     void loadInstitutions();
-    
-    Institutions getInstitutions();
 
-    Institution getInstitutionById(String id);
+    Institutions getInstitutions();
 }

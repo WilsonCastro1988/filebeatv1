@@ -1,0 +1,21 @@
+{
+  "name": "filebeatv1",
+  "version": "1.0.0",
+  "description": "Test",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WilsonCastro1988/filebeatv1.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/WilsonCastro1988/filebeatv1/issues"
+  },
+  "homepage": "https://github.com/WilsonCastro1988/filebeatv1#readme"
+}

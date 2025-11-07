@@ -1,0 +1,16 @@
+services:
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.15.0
+    container_name: filebeat
+    user: root
+    entrypoint: "filebeat -e -strict.perms=false"
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /c/etc/logs:/app/logs:ro
+    networks:
+      - signcrypt-network
+    restart: always
+
+networks:
+  signcrypt-network:
+    driver: bridge

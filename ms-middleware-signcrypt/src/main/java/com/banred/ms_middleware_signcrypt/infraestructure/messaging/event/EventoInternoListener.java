@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class EventoInternoListener {
-
+    
     private final IInstitutionService institutionService;
 
 
@@ -23,9 +23,9 @@ public class EventoInternoListener {
 
     @EventListener
     public void manejarEventoInterno(EventoInterno evento) {
-        try {
+        try{
             institutionService.loadInstitutions();
-        } catch (AbstractException e) {
+        }catch(AbstractException e){
             throw new AbstractError(e, "Error al actualizar redis " + e.getMessage());
         }
     }
