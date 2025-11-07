@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.banred</groupId>
-    <artifactId>mtls-mock-api</artifactId>
+    <artifactId>ms-ocsp-mock-api</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 

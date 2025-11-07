@@ -4,7 +4,7 @@ info:
   stage: development
   author: Wilson Castro L..
   email: wcastro@banred.fin.ec
-  description: Microservicio Mock Server Mtls para PD
+  description: Microservicio Mock Server OCSP
 jasypt:
   encryptor:
     algorithm: PBEWITHHMACSHA512ANDAES_256
@@ -20,7 +20,9 @@ jasypt:
       - org.springframework.boot.ansi.AnsiPropertySource
 
 server:
-  port: 8443
+  ssl:
+    enabled: false  # FUERZA HTTP
+  port: 8085
   address: 0.0.0.0
   servlet:
     context-path: /api
@@ -44,31 +46,10 @@ server:
     max-http-post-size: 10MB
     preserve-path-on-forward: false
     url-charset: UTF-8
-  ssl:
-    key-store: ${SERVER_SSL_KEY_STORE}
-    key-store-password: ${SERVER_SSL_KEY_STORE_PASSWORD}
-    key-store-type: ${SERVER_SSL_KEY_STORE_TYPE}
-    key-alias: ${SERVER_SSL_KEY_ALIAS}
-    trust-store: ${SERVER_SSL_TRUST_STORE}
-    trust-store-password: ${SERVER_SSL_TRUST_STORE_PASSWORD}
-    trust-store-type: ${SERVER_SSL_TRUST_STORE_TYPE}
-    client-auth: want #${SERVER_SSL_CLIENT_AUTH}
 
-test:
-  encrypted-password: TEST  # Same as your truststore pass
 
 logging:
   level:
     org.springframework.security: DEBUG
     com.ulisesbocchio.jasyptspringboot: DEBUG  # Logs decryption attempts
     org.jasypt: DEBUG  # Logs Jasypt core operations
-
-microservice:
-  parameters:
-    pass_admin_mock: ${MICROSERVICE_PARAMETERS_PASS_ADMIN_MOCK}
-  redis:
-    host: ${SPRING_DATA_REDIS_HOST}
-    port: ${SPRING_DATA_REDIS_PORT}
-    username: ${SPRING_DATA_REDIS_USERNAME}
-    password: ${SPRING_DATA_REDIS_PASSWORD}
-    timeout: ${SPRING_DATA_REDIS_TIMEOUT}

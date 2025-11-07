@@ -2,12 +2,13 @@ package com.banred.mtlsmock.service;
 
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle.asn1.ocsp.OCSPResponseStatus;
-import org.bouncycastle.asn1.ocsp.ResponderID;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.Extension;
-import org.bouncycastle.asn1.x509.Extensions;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.ocsp.*;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DigestCalculator;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
@@ -19,6 +20,7 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
+import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -39,13 +41,13 @@ public class OcspService {
         ocspSignerKey = loadPrivateKey("certs/ca/private/ca.key");
         ocspSignerCert = caCert;
 
-        // Estados simulados de prueba
-        statusMap.put("cliente-valid", CertificateStatus.GOOD);
-        statusMap.put("cliente-expired", CertificateStatus.GOOD);
-        statusMap.put("cliente-unknown", new UnknownStatus());
-        statusMap.put("cliente-invalid", new RevokedStatus(
-                new Date(), CRLReason.keyCompromise
-        ));
+        // Estados simulados
+        // SERIALES FIJOS (deben coincidir con los certificados generados)
+        statusMap.put("1001", CertificateStatus.GOOD);                    // cliente-valid
+        statusMap.put("1002", CertificateStatus.GOOD);                    // cliente-expired
+        statusMap.put("9999", new UnknownStatus());                      // cliente-unknown
+        statusMap.put("8888", new RevokedStatus(new Date(), CRLReason.keyCompromise));
+        Security.addProvider(new BouncyCastleProvider());
     }
 
     private X509Certificate loadCert(String path) throws Exception {
@@ -70,9 +72,10 @@ public class OcspService {
         DigestCalculator digCalc = new JcaDigestCalculatorProviderBuilder()
                 .build().get(CertificateID.HASH_SHA1);
 
-        BasicOCSPRespBuilder builder = new BasicOCSPRespBuilder(
-                new RespID(ResponderID.getInstance(new X509CertificateHolder(ocspSignerCert.getEncoded()).getSubjectPublicKeyInfo()))
-        );
+        // CORREGIDO: Usa JcaX509CertificateHolder para extraer SubjectPublicKeyInfo
+        SubjectPublicKeyInfo publicKeyInfo = new JcaX509CertificateHolder(ocspSignerCert).getSubjectPublicKeyInfo();
+        RespID respID = new RespID(publicKeyInfo, digCalc);
+        BasicOCSPRespBuilder builder = new BasicOCSPRespBuilder(respID);
 
         boolean hasValidRequest = false;
 
@@ -91,15 +94,13 @@ public class OcspService {
             return new OCSPRespBuilder().build(OCSPResponseStatus.MALFORMED_REQUEST, null);
         }
 
-        ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA")
-                .build(ocspSignerKey);
-
-        X509CertificateHolder[] chain = {new X509CertificateHolder(ocspSignerCert.getEncoded())};
+        ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").build(ocspSignerKey);
+        X509CertificateHolder[] chain = {new JcaX509CertificateHolder(ocspSignerCert)};
         BasicOCSPResp basicResp = builder.build(signer, chain, new Date());
 
+        // Soporte para Nonce
         Extension nonceExt = request.getExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
         if (nonceExt != null) {
-            builder.setResponseExtensions(new Extensions(nonceExt));
             basicResp = builder.build(signer, chain, new Date());
         }
 
@@ -107,7 +108,6 @@ public class OcspService {
     }
 
     private String getKeyFromSerial(BigInteger serial) {
-        // En tu implementación real podrías mapear serial -> CN o usar directamente el serial
         for (String key : statusMap.keySet()) {
             if (key.contains(serial.toString())) {
                 return key;

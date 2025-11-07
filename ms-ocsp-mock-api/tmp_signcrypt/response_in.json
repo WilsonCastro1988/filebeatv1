@@ -1,6 +1,0 @@
-{
-  "timestamp": "2025-11-06 18:55:38",
-  "status": 500,
-  "error": "Internal Server Error",
-  "path": "/api/operation"
-}

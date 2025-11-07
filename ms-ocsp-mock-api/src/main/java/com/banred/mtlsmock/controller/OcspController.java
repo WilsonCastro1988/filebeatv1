@@ -7,7 +7,7 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/ocsp")
+@RequestMapping("/ocsp")  // → /api/ocsp
 public class OcspController {
 
     private final OcspService ocspService;
@@ -16,35 +16,34 @@ public class OcspController {
         this.ocspService = ocspService;
     }
 
-    /**
-     * Maneja peticiones OCSP tipo GET (Base64 URL encoded)
-     */
-    @GetMapping
-    public ResponseEntity<byte[]> handleGet(@RequestParam("request") String b64Request) {
+    @GetMapping(produces = "application/ocsp-response")
+    public ResponseEntity<byte[]> handleGet(
+            @RequestParam(value = "request", required = false) String b64Request) {
+        if (b64Request == null || b64Request.isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body("Missing 'request' parameter".getBytes());
+        }
         try {
             byte[] reqBytes = java.util.Base64.getUrlDecoder().decode(b64Request);
             return buildResponse(reqBytes);
         } catch (Exception e) {
             return ResponseEntity.badRequest()
-                    .body(("Invalid OCSP GET: " + e.getMessage()).getBytes());
+                    .body(("Invalid Base64: " + e.getMessage()).getBytes());
         }
     }
 
-    /**
-     * Maneja peticiones OCSP tipo POST (DER binario)
-     */
     @PostMapping(
-            consumes = { "application/ocsp-request", MediaType.APPLICATION_OCTET_STREAM_VALUE },
+            consumes = "application/ocsp-request",
             produces = "application/ocsp-response"
     )
-    public ResponseEntity<byte[]> handlePost(@RequestBody byte[] request) {
-        try {
-            return buildResponse(request);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest()
-                    .body(("Invalid OCSP POST: " + e.getMessage()).getBytes());
+    public ResponseEntity<byte[]> handlePost(@RequestBody byte[] requestBytes) throws Exception {
+        System.out.println("POST recibido: " + requestBytes.length + " bytes");
+
+        if (requestBytes.length == 0) {
+            return ResponseEntity.badRequest().body("Empty request".getBytes());
         }
+
+        return buildResponse(requestBytes);
     }
 
     private ResponseEntity<byte[]> buildResponse(byte[] requestBytes) throws Exception {
